@@ -1,0 +1,26 @@
+# GPS-Outage Simulation Configuration
+# SIMULATED experiment only — no real GPS hardware involved.
+
+experiment_id: gps_outage_sim_v1
+description: "Simulated GPS-denied interval using best VO config (ORB+ORB)"
+
+# Feature config to use for this simulation
+feature_config: configs/experiments/orb_orb.yaml
+
+# Dataset to run the outage on
+dataset_config: configs/datasets/icl_nuim.yaml
+
+# Outage interval (frame indices, inclusive)
+# Frames before outage_start use full GT-anchored positioning.
+# Frames [outage_start, outage_end] use VO-only propagation.
+outage_start: 100
+outage_end: 200
+
+# ATE alignment for pre/post-outage evaluation
+ate_alignment: sim3
+
+note: >
+  Scale anchor is applied once at outage_start using the ground-truth position
+  at that frame. This simulates receiving a final GPS fix before signal loss.
+  The anchor scale is documented in all output tables.
+  Do NOT interpret output positions as absolute geographic coordinates.
