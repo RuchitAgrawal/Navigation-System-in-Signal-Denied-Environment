@@ -3,16 +3,16 @@ pipeline.py — Main visual odometry pipeline loop.
 
 Implements a classical frame-to-frame monocular VO:
     1. Load greyscale frame pair (prev, curr)
-    2. Detect keypoints in both frames
-    3. Compute binary descriptors
-    4. Match with Hamming BFMatcher + Lowe ratio filter
-    5. Estimate Essential matrix via RANSAC
-    6. Recover R, t (direction only — scale ambiguous)
-    7. Accumulate pose into trajectory
-    8. Record per-frame diagnostics
+    2. Detect keypoints and compute descriptors (via FeatureExtractor)
+    3. Match with Hamming BFMatcher + Lowe ratio filter
+    4. Estimate Essential matrix via RANSAC
+    5. Recover R, t (direction only — scale ambiguous)
+    6. Accumulate pose into trajectory
+    7. Record per-frame diagnostics
 
 Design decisions
 ----------------
+- Delegates detect/describe to FeatureExtractor for clean separation.
 - All failure modes are handled gracefully (no crashes).
 - On failure, the previous pose is carried forward.
 - Every frame gets a FrameDiagnostics record (success or failure).
@@ -30,7 +30,7 @@ import numpy as np
 
 from src.datasets.base_dataset import BaseDataset
 from src.features.config import FeatureConfig
-from src.features.descriptor import ManualBRIEF
+from src.features.extractor import FeatureExtractor
 from src.geometry.essential import estimate_pose
 from src.geometry.pose import FrameDiagnostics, FrameStatus, PoseAccumulator
 from src.matching.matcher import match_and_filter, matches_to_point_arrays
@@ -74,6 +74,7 @@ class VOPipeline:
         min_inlier_ratio: float = 0.10,
     ) -> None:
         self.fc = feature_config
+        self.extractor = FeatureExtractor(feature_config)
         self.ransac_threshold = ransac_threshold
         self.ransac_confidence = ransac_confidence
         self.ransac_max_iter = ransac_max_iter
@@ -108,7 +109,8 @@ class VOPipeline:
         self.accumulator.initialize(timestamp=first_frame.timestamp)
 
         prev_gray = dataset.load_image_gray(0)
-        prev_kps, prev_descs = self._detect_and_describe(prev_gray)
+        prev_result = self.extractor.extract(prev_gray)
+        prev_kps, prev_descs = prev_result.keypoints, prev_result.descriptors
 
         # Diagnostic for frame 0 (no relative pose, just SKIPPED)
         diag0 = FrameDiagnostics(
@@ -125,9 +127,10 @@ class VOPipeline:
             curr_gray = dataset.load_image_gray(idx)
 
             # ---------- Detect + Describe ----------
-            t0 = time.perf_counter()
-            curr_kps, curr_descs = self._detect_and_describe(curr_gray)
-            detect_describe_ms = (time.perf_counter() - t0) * 1000.0
+            curr_result = self.extractor.extract(curr_gray)
+            curr_kps   = curr_result.keypoints
+            curr_descs = curr_result.descriptors
+            detect_describe_ms = curr_result.detect_ms + curr_result.describe_ms
 
             # ---------- Check keypoint count ----------
             if len(prev_kps) < self.min_keypoints or len(curr_kps) < self.min_keypoints:
@@ -225,31 +228,3 @@ class VOPipeline:
             prev_gray, prev_kps, prev_descs = curr_gray, curr_kps, curr_descs
 
         return self.accumulator
-
-    # ------------------------------------------------------------------ #
-    # Private helpers
-    # ------------------------------------------------------------------ #
-
-    def _detect_and_describe(
-        self, gray: np.ndarray
-    ) -> Tuple[List[cv2.KeyPoint], np.ndarray]:
-        """Detect keypoints and compute descriptors for one frame."""
-        fc = self.fc
-
-        if fc.is_joint_orb:
-            # ORB+ORB: detect and compute in a single call
-            kps, descs = fc.detector.detectAndCompute(gray, None)
-            return list(kps) if kps is not None else [], descs
-
-        # Separate detect + describe
-        kps = fc.detector.detect(gray, None)
-
-        if not kps:
-            return [], None
-
-        if isinstance(fc.descriptor, ManualBRIEF):
-            kps, descs = fc.descriptor.compute(gray, kps)
-        else:
-            kps, descs = fc.descriptor.compute(gray, kps)
-
-        return list(kps) if kps is not None else [], descs
