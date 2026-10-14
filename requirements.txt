@@ -1,0 +1,18 @@
+# Core dependencies
+numpy>=1.24
+scipy>=1.10
+opencv-python>=4.8
+matplotlib>=3.7
+pandas>=2.0
+pyyaml>=6.0
+psutil>=5.9
+
+# Testing
+pytest>=7.4
+pytest-cov>=4.1
+
+# Optional: trajectory evaluation (evo tool)
+# evo>=1.28
+
+# Optional: contrib features (BRIEF via xfeatures2d)
+# opencv-contrib-python>=4.8
