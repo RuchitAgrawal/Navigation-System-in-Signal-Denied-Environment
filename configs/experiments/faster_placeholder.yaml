@@ -1,0 +1,39 @@
+# FASTER Detector — Placeholder Configuration
+# Status: NOT IMPLEMENTED in this version.
+#
+# FASTER (Rosten, Porter & Drummond, 2010) selects the FAST detector
+# threshold automatically using a machine-learning approach trained on
+# representative image data. This makes it more adaptive than vanilla FAST,
+# but requires:
+#   1. A labelled training set of corner / non-corner patches.
+#   2. A threshold-learning step (decision tree or similar classifier).
+#   3. A verified Python implementation or binding.
+#
+# None of the above are available in the standard opencv-python package.
+# A genuine FASTER implementation is NOT equivalent to calling
+# cv2.FastFeatureDetector_create() with a renamed threshold.
+#
+# This file is kept as a documented placeholder for future extension.
+# When a verified implementation is available:
+#   - Implement in src/features/detector.py under the "FASTER" name.
+#   - Add ("FASTER", "BRIEF"), ("FASTER", "ORB") to VALID_COMBINATIONS.
+#   - Validate on ICL-NUIM and TartanAir before reporting results.
+#
+# Reference:
+#   Rosten, E., Porter, R., & Drummond, T. (2010).
+#   Faster and Better: A Machine Learning Approach to Corner Detection.
+#   IEEE TPAMI 32(1), 105-119.
+
+experiment_id: faster_placeholder
+description: "FASTER detector — future extension, not yet implemented"
+status: NOT_IMPLEMENTED
+
+detector:
+  name: FASTER   # will raise NotImplementedError until implemented
+  note: "Requires ML threshold training, not a FAST alias"
+
+descriptor:
+  name: ORB  # placeholder, not actually run
+
+# This config intentionally raises NotImplementedError when loaded
+# to prevent accidental execution and fabrication of results.
