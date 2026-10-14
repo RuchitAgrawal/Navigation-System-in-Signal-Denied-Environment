@@ -1,0 +1,36 @@
+# Experiment: FAST detector + ORB descriptor
+# Config B in the benchmark matrix
+
+experiment_id: fast_orb_v1
+description: "FAST keypoints with ORB binary descriptors (rotation-invariant descriptor)"
+
+detector:
+  name: FAST
+  threshold: 20
+  nonmax_suppression: true
+  max_keypoints: 2000
+
+descriptor:
+  name: ORB
+  nfeatures: 2000
+  scale_factor: 1.2
+  nlevels: 8
+  edge_threshold: 31
+  patch_size: 31
+  fast_threshold: 20
+
+matching:
+  method: hamming
+  cross_check: false
+  ratio_threshold: 0.75
+
+ransac:
+  method: RANSAC
+  threshold: 1.0
+  confidence: 0.999
+  max_iterations: 2000
+
+tracking:
+  min_keypoints: 8
+  min_matches: 8
+  min_inlier_ratio: 0.10

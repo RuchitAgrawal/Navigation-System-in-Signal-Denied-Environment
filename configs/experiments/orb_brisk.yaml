@@ -1,0 +1,36 @@
+# Experiment: ORB detector + BRISK descriptor
+# Config D in the benchmark matrix
+
+experiment_id: orb_brisk_v1
+description: "ORB keypoints with BRISK binary descriptors (scale and rotation invariant)"
+
+detector:
+  name: ORB
+  nfeatures: 2000
+  scale_factor: 1.2
+  nlevels: 8
+  edge_threshold: 31
+  patch_size: 31
+  fast_threshold: 20
+
+descriptor:
+  name: BRISK
+  thresh: 30              # AGAST detection threshold (used internally by BRISK)
+  octaves: 3
+  pattern_scale: 1.0
+
+matching:
+  method: hamming
+  cross_check: false
+  ratio_threshold: 0.75
+
+ransac:
+  method: RANSAC
+  threshold: 1.0
+  confidence: 0.999
+  max_iterations: 2000
+
+tracking:
+  min_keypoints: 8
+  min_matches: 8
+  min_inlier_ratio: 0.10

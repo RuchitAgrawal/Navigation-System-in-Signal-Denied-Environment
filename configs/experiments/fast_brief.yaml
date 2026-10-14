@@ -1,0 +1,32 @@
+# Experiment: FAST detector + BRIEF descriptor
+# Config A in the benchmark matrix
+
+experiment_id: fast_brief_v1
+description: "FAST keypoints with BRIEF binary descriptors (no rotation invariance)"
+
+detector:
+  name: FAST
+  threshold: 20
+  nonmax_suppression: true
+  max_keypoints: 2000
+
+descriptor:
+  name: BRIEF
+  bytes: 32               # 256-bit descriptor (32 bytes)
+  use_orientation: false  # BRIEF is not rotation-invariant by design
+
+matching:
+  method: hamming
+  cross_check: false
+  ratio_threshold: 0.75
+
+ransac:
+  method: RANSAC
+  threshold: 1.0
+  confidence: 0.999
+  max_iterations: 2000
+
+tracking:
+  min_keypoints: 8
+  min_matches: 8
+  min_inlier_ratio: 0.10

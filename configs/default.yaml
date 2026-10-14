@@ -1,0 +1,25 @@
+# Default global configuration for all VO experiments
+# Override per-experiment values in configs/experiments/*.yaml
+
+ransac:
+  method: RANSAC          # RANSAC | LMEDS
+  threshold: 1.0          # pixel reprojection threshold
+  confidence: 0.999
+  max_iterations: 2000
+
+matching:
+  ratio_threshold: 0.75   # Lowe ratio test
+  cross_check: false
+
+features:
+  max_keypoints: 2000
+
+tracking:
+  min_keypoints: 8        # below this → FAILED_FEATURES
+  min_matches: 8          # below this → FAILED_MATCHES
+  min_inlier_ratio: 0.10  # below this → FAILED_RANSAC
+
+output:
+  save_trajectory: true
+  save_diagnostics: true
+  save_figures: true
