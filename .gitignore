@@ -13,9 +13,8 @@ venv/
 ENV/
 env/
 
-# Datasets (never commit raw data)
+# Raw dataset files (never commit large data files)
 data/
-datasets/
 
 # Results (generated output)
 results/csv/*.csv
