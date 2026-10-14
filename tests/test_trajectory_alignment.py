@@ -65,13 +65,18 @@ class TestComputeATE:
         np.testing.assert_allclose(result.rmse, 0.0, atol=1e-8)
 
     def test_sim3_removes_global_scale(self, straight_trajectory):
-        """Sim(3) alignment should yield near-zero ATE for a scaled trajectory."""
+        """Sim(3) alignment should yield near-zero ATE for a scaled trajectory.
+
+        Umeyama aligns src→dst: s * R * src + t ≈ dst.
+        Here src=est (scaled 2×), dst=gt → s = 0.5 to map est back to gt scale.
+        """
         gt_poses = straight_trajectory
         # Scale estimated trajectory by 2x (simulates monocular scale ambiguity)
         est_poses = [make_pose(T[:3, :3], T[:3, 3] * 2.0) for T in straight_trajectory]
         result = compute_ate(est_poses, gt_poses, alignment="sim3")
         np.testing.assert_allclose(result.rmse, 0.0, atol=1e-6)
-        np.testing.assert_allclose(result.scale, 2.0, rtol=1e-5)
+        # Umeyama recovers s=0.5 to bring est (2× too large) down to gt scale
+        np.testing.assert_allclose(result.scale, 0.5, rtol=1e-5)
 
     def test_ate_nonzero_for_drifted_trajectory(self, straight_trajectory):
         """Adding random noise should produce non-zero ATE."""
