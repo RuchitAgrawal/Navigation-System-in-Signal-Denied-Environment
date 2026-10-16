@@ -1,0 +1,26 @@
+﻿# FAST + BRIEF experiment with higher keypoint limit (v2)
+experiment_id: fast_brief_v2
+description: 'FAST + BRIEF with max 3000 keypoints and tighter ratio'
+detector:
+  name: FAST
+  threshold: 15
+  nonmax_suppression: true
+  max_keypoints: 3000
+descriptor:
+  name: BRIEF
+  bytes: 32
+  use_orientation: false
+matching:
+  method: hamming
+  cross_check: false
+  ratio_threshold: 0.70
+ransac:
+  method: RANSAC
+  threshold: 1.0
+  confidence: 0.999
+  max_iterations: 2000
+tracking:
+  min_keypoints: 8
+  min_matches: 8
+  min_inlier_ratio: 0.10
+
