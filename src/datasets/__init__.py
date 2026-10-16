@@ -1,5 +1,5 @@
-"""
-src/datasets/__init__.py — Public API for the datasets module.
+﻿"""
+src/datasets/__init__.py â€” Public API for the datasets module.
 """
 from src.datasets.base_dataset import BaseDataset, CameraIntrinsics, DatasetFrame
 from src.datasets.icl_nuim import ICLNUIMDataset, load_icl_nuim_from_config
@@ -23,3 +23,4 @@ __all__ = [
     "TartanAirDataset", "load_tartanair_from_config",
     "load_dataset",
 ]
+
