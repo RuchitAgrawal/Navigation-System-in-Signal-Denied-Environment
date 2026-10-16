@@ -1,0 +1,27 @@
+﻿# ORB + BRISK experiment with tuned parameters (v2)
+experiment_id: orb_brisk_v2
+description: 'ORB keypoints with BRISK descriptors, tuned BRISK threshold'
+detector:
+  name: ORB
+  nfeatures: 2000
+  scale_factor: 1.2
+  nlevels: 8
+descriptor:
+  name: BRISK
+  thresh: 20
+  octaves: 4
+  pattern_scale: 1.0
+matching:
+  method: hamming
+  cross_check: false
+  ratio_threshold: 0.80
+ransac:
+  method: RANSAC
+  threshold: 1.5
+  confidence: 0.999
+  max_iterations: 2000
+tracking:
+  min_keypoints: 8
+  min_matches: 8
+  min_inlier_ratio: 0.10
+
