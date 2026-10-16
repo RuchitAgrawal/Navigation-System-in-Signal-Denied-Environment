@@ -1,12 +1,12 @@
-"""
-pipeline.py — Main visual odometry pipeline loop.
+﻿"""
+pipeline.py â€” Main visual odometry pipeline loop.
 
 Implements a classical frame-to-frame monocular VO:
     1. Load greyscale frame pair (prev, curr)
     2. Detect keypoints and compute descriptors (via FeatureExtractor)
     3. Match with Hamming BFMatcher + Lowe ratio filter
     4. Estimate Essential matrix via RANSAC
-    5. Recover R, t (direction only — scale ambiguous)
+    5. Recover R, t (direction only â€” scale ambiguous)
     6. Accumulate pose into trajectory
     7. Record per-frame diagnostics
 
@@ -228,3 +228,4 @@ class VOPipeline:
             prev_gray, prev_kps, prev_descs = curr_gray, curr_kps, curr_descs
 
         return self.accumulator
+
