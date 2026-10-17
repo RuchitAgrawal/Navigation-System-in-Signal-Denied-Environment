@@ -1,5 +1,5 @@
-"""
-matcher.py — Feature matching with Lowe ratio filtering and cross-check support.
+﻿"""
+matcher.py â€” Feature matching with Lowe ratio filtering and cross-check support.
 
 All supported descriptor types in this pipeline are binary (BRIEF, ORB, BRISK),
 so Hamming distance is always used.
@@ -14,7 +14,7 @@ Matching strategy
 Reference
 ---------
 Lowe, D.G. (2004). Distinctive image features from scale-invariant keypoints.
-International Journal of Computer Vision, 60(2), 91–110.
+International Journal of Computer Vision, 60(2), 91â€“110.
 """
 
 from __future__ import annotations
@@ -52,7 +52,7 @@ def match_and_filter(
     desc_prev : (N, D) uint8   Descriptors from the previous frame.
     desc_curr : (M, D) uint8   Descriptors from the current frame.
     norm_type : int             Distance norm (cv2.NORM_HAMMING).
-    ratio_threshold : float     Lowe ratio test threshold (0.0–1.0).
+    ratio_threshold : float     Lowe ratio test threshold (0.0â€“1.0).
     cross_check : bool          Use cross-check instead of ratio test.
 
     Returns
@@ -113,3 +113,4 @@ def matches_to_point_arrays(
     pts_curr = np.array([kps_curr[m.trainIdx].pt for m in matches],
                         dtype=np.float32)
     return pts_prev, pts_curr
+
