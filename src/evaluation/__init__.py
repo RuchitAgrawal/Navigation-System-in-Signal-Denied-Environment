@@ -2,8 +2,9 @@
 from src.evaluation.rpe import compute_rpe, RPEResult
 from src.evaluation.metrics import build_summary_row, save_per_frame_csv, save_summary_csv
 from src.evaluation.drift import compute_scale_over_time
+from src.evaluation.pose_error import decompose_pose_error
 
 __all__ = ['compute_ate', 'umeyama_alignment', 'ATEResult', 'compute_rpe', 'RPEResult',
            'build_summary_row', 'save_per_frame_csv', 'save_summary_csv',
-           'compute_scale_over_time']
+           'compute_scale_over_time', 'decompose_pose_error']
 
