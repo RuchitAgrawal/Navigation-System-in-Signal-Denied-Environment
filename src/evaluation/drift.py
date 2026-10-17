@@ -30,3 +30,4 @@ def compute_scale_over_time(
             scales.append(float('nan'))
     return np.array(scales, dtype=np.float64)
 
+
