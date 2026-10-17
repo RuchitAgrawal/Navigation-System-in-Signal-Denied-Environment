@@ -45,3 +45,4 @@ from src.geometry.transforms import make_pose
     def load_image_gray(self, idx: int) -> np.ndarray:
         return self._images[idx]
 
+
