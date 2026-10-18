@@ -1,0 +1,20 @@
+﻿# TartanAir AbandonedFactory Dataset Config
+dataset: tartanair
+root: data/tartanair
+environment: abandonedfactory
+difficulty: Easy
+trajectory: P000
+camera_stream: image_left
+camera:
+  fx: 320.0
+  fy: 320.0
+  cx: 320.0
+  cy: 240.0
+  width: 640
+  height: 480
+gt_convention: ned_body
+internal_convention: camera_to_world
+frame_start: null
+frame_end: null
+frame_step: 1
+
