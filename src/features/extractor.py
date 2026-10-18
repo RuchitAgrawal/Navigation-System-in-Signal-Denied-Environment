@@ -1,5 +1,5 @@
-"""
-src/features/extractor.py — Unified detect-and-describe wrapper.
+﻿"""
+src/features/extractor.py â€” Unified detect-and-describe wrapper.
 
 Provides a single `FeatureExtractor` class that handles all
 detector/descriptor combinations cleanly, including:
@@ -105,3 +105,4 @@ class FeatureExtractor:
             detect_ms=detect_ms,
             describe_ms=describe_ms,
         )
+
