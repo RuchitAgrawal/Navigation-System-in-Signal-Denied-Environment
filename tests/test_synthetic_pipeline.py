@@ -29,3 +29,4 @@ from src.geometry.pose import FrameStatus
         acc = pipeline.run(dataset)
         assert acc.diagnostics[0].status == FrameStatus.SKIPPED
 
+
