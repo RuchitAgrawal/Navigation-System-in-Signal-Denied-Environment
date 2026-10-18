@@ -1,5 +1,5 @@
-"""
-tartanair.py — TartanAir dataset loader.
+﻿"""
+tartanair.py â€” TartanAir dataset loader.
 
 Official page: https://tartanair.org/
 Tools repo:    https://github.com/castacks/tartanair_tools
@@ -25,7 +25,7 @@ Camera intrinsics
 -----------------
 Standard TartanAir left camera (same for all environments):
     fx = 320.0, fy = 320.0, cx = 320.0, cy = 240.0
-    Image size: 640 × 480, no distortion.
+    Image size: 640 Ã— 480, no distortion.
 Source: TartanAir documentation.
 """
 
@@ -149,7 +149,7 @@ class TartanAirDataset(BaseDataset):
 
     @staticmethod
     def _parse_poses(path: Path) -> List[np.ndarray]:
-        """Parse pose_left.txt (NED body frame) → list of T_wc (4×4)."""
+        """Parse pose_left.txt (NED body frame) â†’ list of T_wc (4Ã—4)."""
         poses = []
         with open(path) as f:
             for line in f:
@@ -183,3 +183,4 @@ def load_tartanair_from_config(dataset_cfg: dict) -> TartanAirDataset:
         frame_end=dataset_cfg.get("frame_end"),
         frame_step=int(dataset_cfg.get("frame_step", 1)),
     )
+
