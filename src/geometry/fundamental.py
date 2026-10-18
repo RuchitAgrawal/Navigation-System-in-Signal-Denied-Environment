@@ -1,5 +1,5 @@
-"""
-src/geometry/fundamental.py — Fundamental matrix utilities.
+﻿"""
+src/geometry/fundamental.py â€” Fundamental matrix utilities.
 
 The Fundamental matrix F relates corresponding points in two uncalibrated views:
     x'^T F x = 0
@@ -106,3 +106,4 @@ def compute_epipolar_lines(
         return (F @ pts_h.T).T
     else:
         return (F.T @ pts_h.T).T
+
