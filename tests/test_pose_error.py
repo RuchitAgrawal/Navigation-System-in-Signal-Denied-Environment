@@ -23,3 +23,4 @@ from src.geometry.transforms import make_pose
         err = decompose_pose_error(T_est, T_gt)
         np.testing.assert_allclose(err['rot_error_deg'], 45.0, atol=0.01)
 
+
