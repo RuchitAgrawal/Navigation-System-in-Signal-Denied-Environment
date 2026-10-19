@@ -1,5 +1,5 @@
-"""
-gps_outage.py — Simulated GPS-denied interval experiment.
+﻿"""
+gps_outage.py â€” Simulated GPS-denied interval experiment.
 
 IMPORTANT: This is a SIMULATED experiment only.
 - No real RF interference or GPS hardware is involved.
@@ -92,7 +92,7 @@ def simulate_gps_outage(
 
     if verbose:
         print(f"\n[GPS Outage Simulation]")
-        print(f"  Outage interval : frames {outage_start} – {outage_end}")
+        print(f"  Outage interval : frames {outage_start} â€“ {outage_end}")
         print(f"  Scale anchor    : {scale_anchor:.4f} (applied at frame {anchor_idx})")
 
     # --- Propagate VO during outage ---
@@ -160,8 +160,8 @@ def _save_outage_plot(
     """Save a two-panel GPS outage figure."""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
     fig.suptitle(
-        f"Simulated GPS Outage — {config_id.upper()} | {dataset_name} / {sequence_name}\n"
-        f"[Outage: frames {outage_start}–{outage_end}]",
+        f"Simulated GPS Outage â€” {config_id.upper()} | {dataset_name} / {sequence_name}\n"
+        f"[Outage: frames {outage_start}â€“{outage_end}]",
         fontsize=12, fontweight="bold",
     )
 
@@ -195,3 +195,4 @@ def _save_outage_plot(
     Path(save_path).parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
+
