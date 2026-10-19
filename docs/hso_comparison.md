@@ -1,6 +1,6 @@
-# HSO vs. Our Implementation — Comparison
+﻿# HSO vs. Our Implementation â€” Comparison
 
-**Reference:** [HSO — Hybrid Sparse Visual Odometry](https://github.com/luodongting/HSO)  
+**Reference:** [HSO â€” Hybrid Sparse Visual Odometry](https://github.com/luodongting/HSO)  
 **License:** HSO is distributed under GPL-3.0.  
 **Attribution:** Luodongting. *HSO: Hybrid Sparse Visual Odometry*. GitHub, 2022.
 
@@ -35,18 +35,18 @@
 
 The following design patterns in our pipeline were informed by studying HSO:
 
-1. **Modular component separation** — HSO separates feature tracking, map
+1. **Modular component separation** â€” HSO separates feature tracking, map
    management, and pose estimation into distinct classes. We mirror this with
    `detector`, `descriptor`, `matcher`, `pipeline`, and `accumulator` modules.
 
-2. **Failure handling per frame** — HSO tracks tracking quality per frame and
+2. **Failure handling per frame** â€” HSO tracks tracking quality per frame and
    resets when quality drops. We adopt a similar per-frame `FrameStatus` enum
    with graceful failure logging.
 
-3. **Trajectory output format** — HSO outputs poses in TUM format. We follow
+3. **Trajectory output format** â€” HSO outputs poses in TUM format. We follow
    the same convention for compatibility with standard evaluation tools.
 
-4. **Evaluation against ground truth** — HSO evaluates ATE post-run without
+4. **Evaluation against ground truth** â€” HSO evaluates ATE post-run without
    using GT during motion estimation. We enforce the same rule strictly.
 
 ---
@@ -80,3 +80,4 @@ under the MIT License without GPL inheritance obligations.
 
 If any HSO code is incorporated in future extensions, the GPL-3.0 license
 terms must be respected and the repository license updated accordingly.
+
