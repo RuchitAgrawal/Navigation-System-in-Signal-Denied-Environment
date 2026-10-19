@@ -1,4 +1,4 @@
-# Research Report
+﻿# Research Report
 
 **Title:** A Computer Vision-Assisted GPS Navigation System for Robust Positioning in Signal-Denied Environments  
 **Module Contribution:** Visual Odometry Pipeline  
@@ -8,7 +8,7 @@
 
 ## 1. Abstract
 
-This report presents a classical, feature-based visual odometry (VO) pipeline implemented in Python as a contribution to a GPS-denied navigation system. The pipeline estimates camera motion from consecutive monocular images using standard computer vision techniques and evaluates resulting trajectories against ground truth on two synthetic datasets: ICL-NUIM (indoor) and TartanAir (outdoor). We investigate how four lightweight feature detection and description configurations — FAST+BRIEF, FAST+ORB, ORB+ORB, and ORB+BRISK — affect trajectory accuracy (ATE), robustness (tracking success rate), and computational efficiency (FPS). A simulated GPS-outage experiment demonstrates the pipeline's role as a fallback positioning mechanism. The implementation is modular, configurable, and designed for eventual integration with a GPS/sensor-fusion component.
+This report presents a classical, feature-based visual odometry (VO) pipeline implemented in Python as a contribution to a GPS-denied navigation system. The pipeline estimates camera motion from consecutive monocular images using standard computer vision techniques and evaluates resulting trajectories against ground truth on two synthetic datasets: ICL-NUIM (indoor) and TartanAir (outdoor). We investigate how four lightweight feature detection and description configurations â€” FAST+BRIEF, FAST+ORB, ORB+ORB, and ORB+BRISK â€” affect trajectory accuracy (ATE), robustness (tracking success rate), and computational efficiency (FPS). A simulated GPS-outage experiment demonstrates the pipeline's role as a fallback positioning mechanism. The implementation is modular, configurable, and designed for eventual integration with a GPS/sensor-fusion component.
 
 ---
 
@@ -16,7 +16,7 @@ This report presents a classical, feature-based visual odometry (VO) pipeline im
 
 GPS-based positioning fails or degrades in signal-denied environments such as tunnels, dense urban canyons, indoor spaces, and GPS-jammed zones. Visual odometry offers a self-contained motion estimation capability using only camera images. When integrated with GPS measurements via a sensor-fusion layer (e.g., Extended Kalman Filter), VO can maintain positioning during GPS outages.
 
-This project implements and evaluates the VO module. The broader system — including GPS processing, EKF fusion, IMU integration, and road-network localization — is handled by other modules outside the scope of this report.
+This project implements and evaluates the VO module. The broader system â€” including GPS processing, EKF fusion, IMU integration, and road-network localization â€” is handled by other modules outside the scope of this report.
 
 **Research question:**
 > How do lightweight feature detection, description, and matching strategies affect the trajectory accuracy, tracking robustness, and computational efficiency of classical visual odometry across synthetic indoor and outdoor environments?
@@ -49,22 +49,22 @@ HSO (Luodongting, 2022) is a hybrid sparse VO system in C++ that combines FAST-b
 ### 4.1 Pipeline Architecture
 
 ```
-Frame(t) ──► Detect ──► Describe ──► Match ──► Filter ──► Essential Matrix
-                                                           ──► recoverPose
-                                                           ──► Accumulate T_wc[t]
+Frame(t) â”€â”€â–º Detect â”€â”€â–º Describe â”€â”€â–º Match â”€â”€â–º Filter â”€â”€â–º Essential Matrix
+                                                           â”€â”€â–º recoverPose
+                                                           â”€â”€â–º Accumulate T_wc[t]
 ```
 
 Every frame produces a `FrameDiagnostics` record regardless of success or failure. Failed frames carry the previous pose forward without extrapolation.
 
 ### 4.2 Coordinate Frame Convention
 
-All poses are stored as **T_wc** (4×4 float64) — camera-to-world transforms. Pose accumulation:
+All poses are stored as **T_wc** (4Ã—4 float64) â€” camera-to-world transforms. Pose accumulation:
 
 ```
-T_wc[t] = T_wc[t-1] @ inv(T_{c(t-1)→c(t)})
+T_wc[t] = T_wc[t-1] @ inv(T_{c(t-1)â†’c(t)})
 ```
 
-where `T_{c(t-1)→c(t)}` is recovered by `cv2.recoverPose`.
+where `T_{c(t-1)â†’c(t)}` is recovered by `cv2.recoverPose`.
 
 ### 4.3 Scale Ambiguity
 
@@ -97,27 +97,27 @@ Large-scale multi-environment synthetic dataset. We use `ocean/Easy/P000`. Camer
 
 ## 6. Results
 
-> **Note:** Results below are placeholders to be filled after running experiments with the actual datasets. All values must be measured — none are fabricated.
+> **Note:** Results below are placeholders to be filled after running experiments with the actual datasets. All values must be measured â€” none are fabricated.
 
-### 6.1 ICL-NUIM — living_room_traj1_loop
+### 6.1 ICL-NUIM â€” living_room_traj1_loop
 
-| Config | ATE RMSE (m) | RPE Trans RMSE (m) | RPE Rot RMSE (°) | Tracking % | Mean FPS |
+| Config | ATE RMSE (m) | RPE Trans RMSE (m) | RPE Rot RMSE (Â°) | Tracking % | Mean FPS |
 |--------|--------------|--------------------|------------------|------------|----------|
-| FAST+BRIEF | — | — | — | — | — |
-| FAST+ORB   | — | — | — | — | — |
-| ORB+ORB    | — | — | — | — | — |
-| ORB+BRISK  | — | — | — | — | — |
+| FAST+BRIEF | â€” | â€” | â€” | â€” | â€” |
+| FAST+ORB   | â€” | â€” | â€” | â€” | â€” |
+| ORB+ORB    | â€” | â€” | â€” | â€” | â€” |
+| ORB+BRISK  | â€” | â€” | â€” | â€” | â€” |
 
 *Table will be populated after dataset download and experiment execution.*
 
-### 6.2 TartanAir — ocean/Easy/P000
+### 6.2 TartanAir â€” ocean/Easy/P000
 
 | Config | ATE RMSE (m) | RPE Trans RMSE (m) | Tracking % | Mean FPS |
 |--------|--------------|--------------------|------------|----------|
-| FAST+BRIEF | — | — | — | — |
-| FAST+ORB   | — | — | — | — |
-| ORB+ORB    | — | — | — | — |
-| ORB+BRISK  | — | — | — | — |
+| FAST+BRIEF | â€” | â€” | â€” | â€” |
+| FAST+ORB   | â€” | â€” | â€” | â€” |
+| ORB+ORB    | â€” | â€” | â€” | â€” |
+| ORB+BRISK  | â€” | â€” | â€” | â€” |
 
 ---
 
@@ -137,7 +137,7 @@ Key questions to address:
 
 A GPS-denied interval is simulated by withholding GPS updates during a selected frame interval. A one-time scale anchor is set at the outage start using the ground-truth position (simulating the last GPS fix). VO-only propagation then accumulates during the outage.
 
-Drift is measured against ground-truth reference positions. This experiment is clearly labeled as **simulated** — no real RF interference or GPS hardware is used.
+Drift is measured against ground-truth reference positions. This experiment is clearly labeled as **simulated** â€” no real RF interference or GPS hardware is used.
 
 Results and drift plots will be added after experiment execution.
 
@@ -145,11 +145,11 @@ Results and drift plots will be added after experiment execution.
 
 ## 9. Limitations
 
-1. **Scale ambiguity** — monocular VO cannot recover metric scale without additional information.
-2. **No bundle adjustment** — frame-to-frame estimation accumulates drift faster than map-based methods.
-3. **No loop closure** — long sequences will drift without correction.
-4. **FASTER not implemented** — genuine implementation requires training-data-driven threshold selection.
-5. **Synthetic datasets only** — real-world results may differ due to lighting, motion blur, and occlusion.
+1. **Scale ambiguity** â€” monocular VO cannot recover metric scale without additional information.
+2. **No bundle adjustment** â€” frame-to-frame estimation accumulates drift faster than map-based methods.
+3. **No loop closure** â€” long sequences will drift without correction.
+4. **FASTER not implemented** â€” genuine implementation requires training-data-driven threshold selection.
+5. **Synthetic datasets only** â€” real-world results may differ due to lighting, motion blur, and occlusion.
 
 ---
 
@@ -172,3 +172,4 @@ Results and drift plots will be added after experiment execution.
 - Sturm et al. (2012). A Benchmark for the Evaluation of RGB-D SLAM Systems. *IROS 2012*.
 - Umeyama (1991). Least-Squares Estimation of Transformation Parameters. *IEEE TPAMI*.
 - Wang et al. (2020). TartanAir: A Dataset to Push the Limits of Visual SLAM. *IROS 2020*.
+
