@@ -1,0 +1,41 @@
+# ICL-NUIM Dataset Configuration
+# Official page: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html
+# Format: TUM RGB-D compatible (groundtruth.txt, rgb.txt, rgb/ folder)
+
+dataset: icl_nuim
+
+# Path to dataset root (update to your local path)
+root: data/icl_nuim
+
+# Sequence to use (one of: living_room_traj0_loop, living_room_traj1_loop,
+#                           living_room_traj2_loop, living_room_traj3_loop,
+#                           office_room_traj0_loop, office_room_traj1_loop,
+#                           office_room_traj2_loop, office_room_traj3_loop)
+sequence: living_room_traj1_loop
+
+# Camera intrinsics for ICL-NUIM living room sequences (no distortion in synthetic data)
+# Source: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/codes.html
+camera:
+  fx: 481.20
+  fy: 480.00
+  cx: 319.50
+  cy: 239.50
+  k1: 0.0
+  k2: 0.0
+  p1: 0.0
+  p2: 0.0
+  width: 640
+  height: 480
+
+# Ground-truth convention
+# Poses in groundtruth.txt are: timestamp tx ty tz qx qy qz qw (TUM format)
+# Convention: camera-to-world (T_wc)
+gt_convention: camera_to_world
+
+# Association tolerance (seconds) for timestamp matching
+assoc_tolerance: 0.02
+
+# Frame range (null = use all frames)
+frame_start: null
+frame_end: null
+frame_step: 1
