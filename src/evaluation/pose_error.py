@@ -27,3 +27,4 @@ def decompose_pose_error(T_est: np.ndarray, T_gt: np.ndarray) -> dict:
         'rot_error_deg': float(np.degrees(rot_err_rad)),
     }
 
+
