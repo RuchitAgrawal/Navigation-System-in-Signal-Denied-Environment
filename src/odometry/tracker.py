@@ -1,5 +1,5 @@
-"""
-tracker.py — Tracking health monitor and recovery utilities.
+﻿"""
+tracker.py â€” Tracking health monitor and recovery utilities.
 
 Provides aggregate tracking statistics from a completed PoseAccumulator
 and detects degenerate runs (>50 % failure rate).
@@ -89,3 +89,4 @@ def compute_fps_stats(diagnostics: List[FrameDiagnostics]) -> dict:
         "mean_fps": float(np.mean(fps_vals)),
         "median_fps": float(np.median(fps_vals)),
     }
+
