@@ -33,3 +33,4 @@ K = np.float64([[481.2, 0, 319.5], [0, 480, 239.5], [0, 0, 1]])
         lines = compute_epipolar_lines(pts, F, which_image=2)
         assert lines.shape == (3, 3)
 
+
