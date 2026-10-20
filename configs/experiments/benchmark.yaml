@@ -1,4 +1,4 @@
-# Benchmark: run all valid configurations
+﻿# Benchmark: run all valid configurations
 # Iterates over all experiment configs on a given dataset
 
 experiment_id: benchmark_all_v1
@@ -20,3 +20,4 @@ output:
   save_summary_csv: true
   save_figures: true
   save_logs: true
+
