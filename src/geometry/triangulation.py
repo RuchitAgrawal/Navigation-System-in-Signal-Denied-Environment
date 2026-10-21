@@ -1,5 +1,5 @@
-"""
-src/geometry/triangulation.py — Optional 3-D point triangulation helper.
+﻿"""
+src/geometry/triangulation.py â€” Optional 3-D point triangulation helper.
 
 Provides triangulation of matched point pairs from two camera views.
 This is NOT used in the main VO pipeline (which uses Essential matrix only)
@@ -84,8 +84,8 @@ def count_positive_depth(
     Parameters
     ----------
     pts_3d : (N, 3) float64  Points in the reference (prev) camera frame.
-    R      : (3, 3) float64  Rotation prev→curr.
-    t      : (3,)   float64  Translation prev→curr.
+    R      : (3, 3) float64  Rotation prevâ†’curr.
+    t      : (3,)   float64  Translation prevâ†’curr.
 
     Returns
     -------
@@ -99,3 +99,4 @@ def count_positive_depth(
     depth_curr = pts_curr[:, 2]
 
     return int(np.sum((depth_ref > 0) & (depth_curr > 0)))
+
