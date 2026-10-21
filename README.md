@@ -1,4 +1,4 @@
-# Navigation System in Signal-Denied Environments
+﻿# Navigation System in Signal-Denied Environments
 ## Visual Odometry Module
 
 **Full Title:** A Computer Vision-Assisted GPS Navigation System for Robust Positioning in Signal-Denied Environments
@@ -18,7 +18,7 @@ The system is designed so its output can eventually be integrated with a GPS nav
 
 ## Architecture Reference
 
-This implementation is architecturally inspired by [HSO (Hybrid Sparse Visual Odometry)](https://github.com/luodongting/HSO) by Luodongting — a C++ implementation of hybrid sparse VO. We adopt its modular component separation philosophy but implement an independent Python pipeline using OpenCV and NumPy. No HSO source code has been copied. HSO is licensed under GPL-3.0.
+This implementation is architecturally inspired by [HSO (Hybrid Sparse Visual Odometry)](https://github.com/luodongting/HSO) by Luodongting â€” a C++ implementation of hybrid sparse VO. We adopt its modular component separation philosophy but implement an independent Python pipeline using OpenCV and NumPy. No HSO source code has been copied. HSO is licensed under GPL-3.0.
 
 ---
 
@@ -26,18 +26,18 @@ This implementation is architecturally inspired by [HSO (Hybrid Sparse Visual Od
 
 | Config ID | Detector | Descriptor | Matcher | Status |
 |-----------|----------|------------|---------|--------|
-| A | FAST | BRIEF | Hamming BFMatcher | ✅ Implemented |
-| B | FAST | ORB | Hamming BFMatcher | ✅ Implemented |
-| C | ORB | ORB | Hamming BFMatcher | ✅ Baseline |
-| D | ORB | BRISK | Hamming BFMatcher | ✅ Implemented |
-| E | FASTER | — | — | ⚠️ Future extension |
+| A | FAST | BRIEF | Hamming BFMatcher | âœ… Implemented |
+| B | FAST | ORB | Hamming BFMatcher | âœ… Implemented |
+| C | ORB | ORB | Hamming BFMatcher | âœ… Baseline |
+| D | ORB | BRISK | Hamming BFMatcher | âœ… Implemented |
+| E | FASTER | â€” | â€” | âš ï¸ Future extension |
 
 ---
 
 ## Datasets
 
-- **ICL-NUIM** — Synthetic indoor RGB-D benchmark ([link](https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html))
-- **TartanAir** — Large-scale synthetic multi-environment dataset ([link](https://tartanair.org/))
+- **ICL-NUIM** â€” Synthetic indoor RGB-D benchmark ([link](https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html))
+- **TartanAir** â€” Large-scale synthetic multi-environment dataset ([link](https://tartanair.org/))
 
 ---
 
@@ -111,30 +111,30 @@ python scripts/run_benchmark.py --dataset icl_nuim
 
 ```
 .
-├── configs/          # YAML experiment and dataset configs
-├── src/
-│   ├── datasets/     # ICL-NUIM and TartanAir loaders
-│   ├── features/     # Detector, descriptor, and combo factory
-│   ├── matching/     # Feature matcher with filtering
-│   ├── geometry/     # SE(3) pose, Essential matrix, Umeyama alignment
-│   ├── odometry/     # Main VO pipeline and failure tracker
-│   ├── evaluation/   # ATE, RPE, and tracking metrics
-│   └── visualization/# Trajectory and match plots
-├── experiments/      # Benchmark runner and GPS-outage simulation
-├── scripts/          # CLI entry points
-├── tests/            # Unit tests (pytest)
-├── results/          # Generated CSVs, figures, and logs
-└── docs/             # Research report and HSO comparison
+â”œâ”€â”€ configs/          # YAML experiment and dataset configs
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ datasets/     # ICL-NUIM and TartanAir loaders
+â”‚   â”œâ”€â”€ features/     # Detector, descriptor, and combo factory
+â”‚   â”œâ”€â”€ matching/     # Feature matcher with filtering
+â”‚   â”œâ”€â”€ geometry/     # SE(3) pose, Essential matrix, Umeyama alignment
+â”‚   â”œâ”€â”€ odometry/     # Main VO pipeline and failure tracker
+â”‚   â”œâ”€â”€ evaluation/   # ATE, RPE, and tracking metrics
+â”‚   â””â”€â”€ visualization/# Trajectory and match plots
+â”œâ”€â”€ experiments/      # Benchmark runner and GPS-outage simulation
+â”œâ”€â”€ scripts/          # CLI entry points
+â”œâ”€â”€ tests/            # Unit tests (pytest)
+â”œâ”€â”€ results/          # Generated CSVs, figures, and logs
+â””â”€â”€ docs/             # Research report and HSO comparison
 ```
 
 ---
 
 ## Evaluation Metrics
 
-- **ATE** (Absolute Trajectory Error) — RMSE, mean, median after Sim(3) alignment
-- **RPE** (Relative Pose Error) — per-frame translation and rotation error
-- **Tracking robustness** — success rate, failure classification
-- **Runtime** — mean/median FPS, 95th-percentile frame time
+- **ATE** (Absolute Trajectory Error) â€” RMSE, mean, median after Sim(3) alignment
+- **RPE** (Relative Pose Error) â€” per-frame translation and rotation error
+- **Tracking robustness** â€” success rate, failure classification
+- **Runtime** â€” mean/median FPS, 95th-percentile frame time
 
 ---
 
@@ -155,5 +155,6 @@ HSO is referenced for architecture inspiration only; no GPL code is included.
 
 ## Author
 
-**Ruchit Agrawal** — Visual Odometry Module  
+**Ruchit Agrawal** â€” Visual Odometry Module  
 Minor Project, Computer Science Engineering
+
