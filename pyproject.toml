@@ -1,10 +1,10 @@
-﻿[build-system]
+[build-system]
 requires = ["setuptools>=63", "wheel"]
 build-backend = "setuptools.backends.legacy:build"
 
 [project]
 name = "visual-odometry-vo"
-version = "0.1.0"
+version = "0.2.0"
 description = "Classical feature-based visual odometry for GPS-denied navigation"
 authors = [{ name = "Ruchit Agrawal" }]
 requires-python = ">=3.9"
@@ -30,5 +30,3 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-
-
