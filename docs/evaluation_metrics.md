@@ -1,4 +1,4 @@
-# Evaluation Metrics Reference
+﻿# Evaluation Metrics Reference
 
 This document defines all evaluation metrics used in the benchmark and explains
 how to interpret the results correctly.
@@ -14,13 +14,13 @@ ground truth.
 
 For each frame i with valid ground-truth T_gt[i] and estimated T_est[i]:
 1. Align the estimated trajectory to the ground truth using the **Umeyama (1991) method**.
-2. Compute the per-frame translation error: `||aligned_pos[i] - gt_pos[i]||₂`.
+2. Compute the per-frame translation error: `||aligned_pos[i] - gt_pos[i]||â‚‚`.
 
 ### Alignment Modes
 
 | Mode | Scale | When to Use |
 |------|-------|-------------|
-| `sim3` | Recovered (s ≠ 1) | **Always for monocular VO** — removes scale ambiguity |
+| `sim3` | Recovered (s â‰  1) | **Always for monocular VO** â€” removes scale ambiguity |
 | `se3`  | Fixed (s = 1)      | Stereo, RGB-D, or after explicit scale anchoring |
 
 > **Important:** Monocular VO ATE must use Sim(3) alignment. Reporting SE(3) ATE
@@ -32,9 +32,9 @@ For each frame i with valid ground-truth T_gt[i] and estimated T_est[i]:
 | Metric | Symbol | Meaning |
 |--------|--------|---------|
 | `ate_rmse_m` | RMSE | Primary accuracy metric (metres after alignment) |
-| `ate_mean_m` | μ | Mean per-frame error |
+| `ate_mean_m` | Î¼ | Mean per-frame error |
 | `ate_median_m` | median | Robust to outlier frames |
-| `ate_std_m` | σ | Spread of per-frame errors |
+| `ate_std_m` | Ïƒ | Spread of per-frame errors |
 | `ate_scale` | s | Recovered scale factor (s=1 means no scale difference) |
 | `ate_n_frames` | N | Number of frames used (frames with valid GT) |
 
@@ -59,7 +59,7 @@ Q_gt  = inv(T_gt[i])  @ T_gt[i+delta]    # relative GT motion
 E_i   = inv(Q_est) @ Q_gt                # error transform
 ```
 
-Translation error: `||E_i[:3, 3]||₂`  
+Translation error: `||E_i[:3, 3]||â‚‚`  
 Rotation error: `arccos((trace(E_i[:3,:3]) - 1) / 2)` (degrees)
 
 ### Reported Metrics
@@ -67,10 +67,10 @@ Rotation error: `arccos((trace(E_i[:3,:3]) - 1) / 2)` (degrees)
 | Metric | Symbol | Meaning |
 |--------|--------|---------|
 | `rpe_trans_rmse_m` | RMSE_t | Translation drift RMSE |
-| `rpe_trans_mean_m` | μ_t | Mean translation drift |
+| `rpe_trans_mean_m` | Î¼_t | Mean translation drift |
 | `rpe_rot_rmse_deg` | RMSE_r | Rotation drift RMSE (degrees) |
-| `rpe_delta_frames` | δ | Frame interval used (default: 1) |
-| `rpe_n_pairs` | N | Number of valid (i, i+δ) pairs |
+| `rpe_delta_frames` | Î´ | Frame interval used (default: 1) |
+| `rpe_n_pairs` | N | Number of valid (i, i+Î´) pairs |
 
 ---
 
@@ -111,12 +111,13 @@ A run is flagged as **degenerate** if `success_rate < 50%`.
 
 For monocular VO after Sim(3) alignment:
 
-- `ate_scale ≈ 1.0` → estimated and GT trajectories have the same scale.
-- `ate_scale < 1.0` → estimated trajectory is compressed relative to GT.
-- `ate_scale > 1.0` → estimated trajectory is expanded relative to GT.
+- `ate_scale â‰ˆ 1.0` â†’ estimated and GT trajectories have the same scale.
+- `ate_scale < 1.0` â†’ estimated trajectory is compressed relative to GT.
+- `ate_scale > 1.0` â†’ estimated trajectory is expanded relative to GT.
 
 Large scale drift (|s - 1| > 0.5) usually indicates significant
 scale drift accumulation or poor initialization.
 
 The GPS-outage simulation uses a **one-time scale anchor** to partially
 correct scale before the outage. This is explicitly labeled in all outputs.
+
