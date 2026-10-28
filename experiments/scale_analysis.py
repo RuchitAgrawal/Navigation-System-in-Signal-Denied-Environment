@@ -1,10 +1,10 @@
-﻿# experiments/scale_analysis.py -- Scale drift analysis experiment
+# experiments/scale_analysis.py -- Scale drift analysis experiment
 '''''Analyse how monocular VO scale drifts over the trajectory length.'''''
 from __future__ import annotations
 from pathlib import Path
 import numpy as np
 
-\ndef run_scale_analysis(
+def run_scale_analysis(
     accumulator,
     gt_poses,
     window: int = 10,
