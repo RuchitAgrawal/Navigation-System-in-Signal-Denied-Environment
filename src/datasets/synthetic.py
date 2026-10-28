@@ -1,4 +1,4 @@
-﻿# datasets/synthetic.py -- Synthetic dataset generator for unit testing
+# datasets/synthetic.py -- Synthetic dataset generator for unit testing
 '''''Generates synthetic frame sequences with known ground-truth poses.'''''
 from __future__ import annotations
 from pathlib import Path
@@ -8,7 +8,7 @@ import numpy as np
 from src.datasets.base_dataset import BaseDataset, CameraIntrinsics, DatasetFrame
 from src.geometry.transforms import make_pose
 
-\nclass SyntheticDataset(BaseDataset):
+class SyntheticDataset(BaseDataset):
     '''''A minimal in-memory dataset for unit testing and smoke tests.'''''
 
     def __init__(self, n_frames: int = 10, image_size: Tuple[int,int] = (480, 640),
