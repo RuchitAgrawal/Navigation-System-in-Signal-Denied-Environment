@@ -1,0 +1,19 @@
+experiment_id: benchmark_demo
+description: "Benchmark across all feature configurations on demo sequence"
+
+configs:
+  - configs/experiments/orb_orb.yaml
+  - configs/experiments/fast_orb.yaml
+  - configs/experiments/fast_brief.yaml
+  - configs/experiments/orb_brisk.yaml
+
+datasets:
+  - configs/datasets/demo.yaml
+
+output:
+  root: results/
+  save_per_frame_csv: true
+  save_summary_csv: true
+  save_figures: true
+  save_logs: true
+
