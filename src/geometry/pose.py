@@ -113,11 +113,15 @@ class PoseAccumulator:
         self.timestamps.append(timestamp)
         self.diagnostics.append(diag)
 
-    def add_failed_pose(self, timestamp: float, diag: FrameDiagnostics) -> None:
+    def add_failed_pose(
+        self, timestamp: float, diag: Optional[FrameDiagnostics] = None, diagnostics: Optional[FrameDiagnostics] = None
+    ) -> None:
         """On tracking failure, carry the previous pose forward."""
+        d = diag if diag is not None else diagnostics
         self.poses.append(self.current_pose.copy())
         self.timestamps.append(timestamp)
-        self.diagnostics.append(diag)
+        if d is not None:
+            self.diagnostics.append(d)
 
     def get_positions(self) -> np.ndarray:
         """Return (N, 3) array of world-frame camera positions."""
