@@ -18,8 +18,10 @@ data/
 
 # Results (generated output)
 results/csv/*.csv
+results/csv/*.txt
 results/figures/*.png
 results/figures/*.pdf
+results/figures/*.mp4
 results/logs/*.json
 results/logs/*.log
 
