@@ -1,11 +1,13 @@
-﻿# tests/test_tracking_report.py -- TrackingReport unit tests
+# tests/test_tracking_report.py -- TrackingReport unit tests
 import pytest
 from src.geometry.pose import FrameDiagnostics, FrameStatus
 from src.odometry.tracker import compute_tracking_report, compute_fps_stats, TrackingReport
 
-\ndef make_diag(status, total_ms=10.0):
+def make_diag(status, total_ms=10.0):
     return FrameDiagnostics(frame_idx=0, status=status, total_time_ms=total_ms)
-\n\nclass TestTrackingReport:
+
+
+class TestTrackingReport:
     def test_all_success(self):
         diags = [make_diag(FrameStatus.SKIPPED)] + [make_diag(FrameStatus.SUCCESS)] * 9
         r = compute_tracking_report(diags)
@@ -29,7 +31,7 @@ from src.odometry.tracker import compute_tracking_report, compute_fps_stats, Tra
         assert r.success_frames == 1
         assert r.failed_features_frames == 1
         assert r.failed_ransac_frames == 1
-\n\nclass TestFpsStats:
+class TestFpsStats:
     def test_zero_ms_handled(self):
         diags = [make_diag(FrameStatus.SUCCESS, total_ms=0.0)]
         stats = compute_fps_stats(diags)

@@ -1,8 +1,8 @@
-﻿# tests/test_pose_error.py -- Unit tests for pose error decomposition
+# tests/test_pose_error.py -- Unit tests for pose error decomposition
 import numpy as np
 from src.evaluation.pose_error import decompose_pose_error
 from src.geometry.transforms import make_pose
-\n\nclass TestDecomposePoseError:
+class TestDecomposePoseError:
     def test_zero_error_for_identical_poses(self):
         T = make_pose(np.eye(3), np.array([1.0, 2.0, 3.0]))
         err = decompose_pose_error(T, T)
