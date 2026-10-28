@@ -1,11 +1,11 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # scripts/visualize_results.py -- Regenerate all plots from saved results
 import argparse, sys
 from pathlib import Path
 sys.path.insert(0, '.')
 import pandas as pd
 from src.visualization.report import save_markdown_summary
-\n\ndef main():
+def main():
     parser = argparse.ArgumentParser(description='Regenerate plots from CSV results')
     parser.add_argument('-r', '--results', default='results', help='Results root')
     args = parser.parse_args()
