@@ -1,0 +1,40 @@
+# Configuration: Adaptive FASTER + ORB + Quadtree Spatial Bucketing + Sub-pixel Refinement
+# Proposed Enhanced Architecture (surpassing Perez-Grau 2017 baseline)
+
+experiment_id: faster_orb_v1
+description: "Adaptive FASTER with ORB descriptor, Quadtree spatial bucketing, and sub-pixel refinement"
+
+detector:
+  name: FASTER
+  initial_threshold: 20
+  min_threshold: 7
+  max_threshold: 60
+  target_features: 2000
+  nonmax_suppression: true
+
+descriptor:
+  name: ORB
+
+bucketing:
+  strategy: quadtree
+  max_features: 2000
+  min_cell_size: 12.0
+
+refinement:
+  subpixel: true
+  win_size: [5, 5]
+
+matching:
+  norm_type: NORM_HAMMING
+  cross_check: true
+  ratio_threshold: 0.75
+
+ransac:
+  threshold: 1.0
+  confidence: 0.999
+  max_iterations: 2000
+
+tracking:
+  min_keypoints: 8
+  min_matches: 8
+  min_inlier_ratio: 0.10
