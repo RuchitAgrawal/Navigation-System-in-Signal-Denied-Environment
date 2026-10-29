@@ -1,4 +1,4 @@
-﻿"""
+"""
 pipeline.py â€” Main visual odometry pipeline loop.
 
 Implements a classical frame-to-frame monocular VO:
@@ -32,8 +32,10 @@ from src.datasets.base_dataset import BaseDataset
 from src.features.config import FeatureConfig
 from src.features.extractor import FeatureExtractor
 from src.geometry.essential import estimate_pose
+from src.geometry.pnp import hybrid_estimate_pose
 from src.geometry.pose import FrameDiagnostics, FrameStatus, PoseAccumulator
 from src.matching.matcher import match_and_filter, matches_to_point_arrays
+from src.odometry.motion_model import ConstantVelocityMotionModel
 
 
 class VOPipeline:
@@ -72,6 +74,8 @@ class VOPipeline:
         min_keypoints: int = 8,
         min_matches: int = 8,
         min_inlier_ratio: float = 0.10,
+        use_motion_model: bool = True,
+        use_pnp: bool = False,
     ) -> None:
         self.fc = feature_config
         self.extractor = FeatureExtractor(feature_config)
@@ -83,6 +87,9 @@ class VOPipeline:
         self.min_keypoints = min_keypoints
         self.min_matches = min_matches
         self.min_inlier_ratio = min_inlier_ratio
+        self.use_motion_model = use_motion_model
+        self.use_pnp = use_pnp
+        self.motion_model = ConstantVelocityMotionModel() if use_motion_model else None
 
         self.accumulator = PoseAccumulator()
 
@@ -107,6 +114,8 @@ class VOPipeline:
         # Initialize with the first frame's timestamp
         first_frame = dataset[0]
         self.accumulator.initialize(timestamp=first_frame.timestamp)
+        if self.motion_model is not None:
+            self.motion_model.reset()
 
         prev_gray = dataset.load_image_gray(0)
         prev_result = self.extractor.extract(prev_gray)
@@ -206,6 +215,30 @@ class VOPipeline:
                 )
                 self.accumulator.add_failed_pose(frame.timestamp, diag)
             else:
+                # Check kinematic continuity if motion prior is active
+                if self.motion_model is not None:
+                    val = self.motion_model.validate_relative_pose(result.R, result.t, frame.timestamp)
+                    if not val.is_valid:
+                        diag = FrameDiagnostics(
+                            frame_idx=idx,
+                            status=FrameStatus.FAILED_POSE,
+                            n_keypoints_prev=len(prev_kps),
+                            n_keypoints_curr=len(curr_kps),
+                            n_raw_matches=len(raw_matches),
+                            n_filtered_matches=len(good_matches),
+                            n_ransac_inliers=result.n_inliers,
+                            ransac_inlier_ratio=result.inlier_ratio,
+                            detect_time_ms=detect_describe_ms,
+                            match_time_ms=match_ms,
+                            pose_time_ms=pose_ms,
+                            total_time_ms=total_ms,
+                        )
+                        self.accumulator.add_failed_pose(frame.timestamp, diag)
+                        prev_gray, prev_kps, prev_descs = curr_gray, curr_kps, curr_descs
+                        continue
+                    else:
+                        self.motion_model.update(result.R, result.t, frame.timestamp)
+
                 diag = FrameDiagnostics(
                     frame_idx=idx,
                     status=FrameStatus.SUCCESS,
