@@ -28,10 +28,19 @@ class TestDetectorFactory:
         det = create_detector(cfg)
         assert isinstance(det, cv2.ORB)
 
-    def test_faster_raises_not_implemented(self):
-        cfg = {"name": "FASTER"}
-        with pytest.raises(NotImplementedError, match="FASTER"):
-            create_detector(cfg)
+    def test_faster_creates_successfully(self):
+        cfg = {"name": "FASTER", "initial_threshold": 20, "target_features": 100}
+        det = create_detector(cfg)
+        from src.features.detector import AdaptiveFASTERDetector
+        assert isinstance(det, AdaptiveFASTERDetector)
+
+    def test_faster_detects_features(self):
+        cfg = {"name": "FASTER", "initial_threshold": 20, "target_features": 50}
+        det = create_detector(cfg)
+        rng = np.random.default_rng(42)
+        img = rng.integers(0, 255, (200, 200), dtype=np.uint8)
+        kps = det.detect(img)
+        assert len(kps) <= 50
 
     def test_unknown_detector_raises_value_error(self):
         cfg = {"name": "SIFT"}
