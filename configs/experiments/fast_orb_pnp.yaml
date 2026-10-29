@@ -1,0 +1,37 @@
+# Configuration: FAST + ORB + RGB-D PnP Motion Estimation
+# Reference: Perez-Grau et al. (Journal of Field Robotics, 2017) baseline with metric depth
+
+experiment_id: fast_orb_pnp_v1
+description: "Perez-Grau 2017 baseline using FAST detector, ORB descriptor, and RGB-D PnP estimation"
+
+detector:
+  name: FAST
+  threshold: 20
+  nonmax_suppression: true
+  max_keypoints: 2000
+
+descriptor:
+  name: ORB
+
+estimation:
+  mode: pnp
+  depth_scale: 1.0
+  min_depth_inliers: 10
+  ransac_threshold: 2.0
+
+bucketing:
+  strategy: grid
+  n_buckets_x: 3
+  n_buckets_y: 2
+  max_features: 2000
+
+matching:
+  norm_type: NORM_HAMMING
+  cross_check: true
+  ratio_threshold: 0.75
+
+tracking:
+  min_keypoints: 8
+  min_matches: 8
+  min_inlier_ratio: 0.10
+  use_motion_model: true
