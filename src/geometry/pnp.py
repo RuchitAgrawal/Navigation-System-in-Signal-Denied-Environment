@@ -13,7 +13,7 @@ from typing import Optional, Tuple
 import cv2
 import numpy as np
 
-from src.geometry.essential import estimate_pose as estimate_pose_essential, PoseResult
+from src.geometry.essential import estimate_pose as estimate_pose_essential, EssentialResult
 
 
 @dataclass
@@ -84,3 +84,150 @@ def backproject_2d_to_3d(
                 valid_mask[i] = True
 
     return pts_3d, valid_mask
+
+
+def estimate_pose_pnp(
+    pts_3d_prev: np.ndarray,
+    pts_2d_curr: np.ndarray,
+    K: np.ndarray,
+    dist_coeffs: Optional[np.ndarray] = None,
+    ransac_threshold: float = 2.0,
+    confidence: float = 0.999,
+    max_iter: int = 2000,
+    min_inlier_ratio: float = 0.20,
+) -> PnPResult:
+    """Estimate metric camera pose from 3D-to-2D correspondences using PnP RANSAC.
+
+    Parameters
+    ----------
+    pts_3d_prev : (N, 3) float64
+        3D point coordinates in the previous camera frame.
+    pts_2d_curr : (N, 2) float32
+        Projected 2D pixel coordinates in the current camera frame.
+    K : (3, 3) ndarray
+        Camera intrinsics matrix.
+    dist_coeffs : Optional ndarray
+        Lens distortion coefficients (None for rectified/synthetic data).
+    ransac_threshold : float
+        RANSAC pixel reprojection error threshold.
+    confidence : float
+        RANSAC confidence level.
+    max_iter : int
+        Maximum RANSAC iterations.
+    min_inlier_ratio : float
+        Minimum inlier ratio required to accept the pose.
+
+    Returns
+    -------
+    PnPResult
+    """
+    n = len(pts_3d_prev)
+    if n < 6:
+        return PnPResult(None, None, None, 0, 0.0, False, "pnp_insufficient_points")
+
+    if dist_coeffs is None:
+        dist_coeffs = np.zeros(4, dtype=np.float64)
+
+    success, rvec, tvec, inliers = cv2.solvePnPRansac(
+        objectPoints=pts_3d_prev.astype(np.float64),
+        imagePoints=pts_2d_curr.astype(np.float64),
+        cameraMatrix=K.astype(np.float64),
+        distCoeffs=dist_coeffs,
+        reprojectionError=float(ransac_threshold),
+        confidence=float(confidence),
+        iterationsCount=int(max_iter),
+        flags=cv2.SOLVEPNP_EPNP,
+    )
+
+    if not success or inliers is None:
+        return PnPResult(None, None, None, 0, 0.0, False, "pnp_failed")
+
+    inlier_indices = inliers.flatten()
+    n_inliers = len(inlier_indices)
+    inlier_ratio = n_inliers / float(n)
+
+    if inlier_ratio < min_inlier_ratio or n_inliers < 6:
+        return PnPResult(None, None, None, n_inliers, inlier_ratio, False, "pnp_low_inliers")
+
+    inlier_mask = np.zeros(n, dtype=np.uint8)
+    inlier_mask[inlier_indices] = 1
+
+    R_rel, _ = cv2.Rodrigues(rvec)
+    t_rel = tvec.reshape(3, 1)
+
+    return PnPResult(
+        R=R_rel,
+        t=t_rel,
+        inlier_mask=inlier_mask,
+        n_inliers=n_inliers,
+        inlier_ratio=inlier_ratio,
+        is_metric=True,
+        mode="pnp",
+    )
+
+
+def hybrid_estimate_pose(
+    pts_prev: np.ndarray,
+    pts_curr: np.ndarray,
+    K: np.ndarray,
+    depth_prev: Optional[np.ndarray] = None,
+    depth_scale: float = 1.0,
+    ransac_threshold: float = 2.0,
+    min_depth_inliers: int = 10,
+) -> PnPResult:
+    """Hybrid motion solver: attempts metric PnP, falls back to Essential matrix.
+
+    Parameters
+    ----------
+    pts_prev, pts_curr : (N, 2) float32
+        Matched 2D point arrays.
+    K : (3, 3) ndarray
+        Camera intrinsic matrix.
+    depth_prev : Optional[np.ndarray]
+        Registered depth image for the previous frame.
+    depth_scale : float
+        Depth units to meters scale factor.
+    ransac_threshold : float
+        RANSAC pixel error threshold.
+    min_depth_inliers : int
+        Minimum PnP inliers required to accept metric pose.
+
+    Returns
+    -------
+    PnPResult
+    """
+    n = len(pts_prev)
+    if n < 8:
+        return PnPResult(None, None, None, 0, 0.0, False, "failed_insufficient_matches")
+
+    # 1. Attempt metric PnP if depth is available
+    if depth_prev is not None:
+        pts_3d_prev, valid_depth = backproject_2d_to_3d(pts_prev, depth_prev, K, depth_scale=depth_scale)
+        n_valid = int(valid_depth.sum())
+
+        if n_valid >= min_depth_inliers:
+            pnp_res = estimate_pose_pnp(
+                pts_3d_prev[valid_depth],
+                pts_curr[valid_depth],
+                K,
+                ransac_threshold=ransac_threshold,
+            )
+            if pnp_res.R is not None and pnp_res.n_inliers >= min_depth_inliers:
+                full_mask = np.zeros(n, dtype=np.uint8)
+                valid_idx = np.where(valid_depth)[0]
+                if pnp_res.inlier_mask is not None:
+                    full_mask[valid_idx[pnp_res.inlier_mask == 1]] = 1
+                pnp_res.inlier_mask = full_mask
+                return pnp_res
+
+    # 2. Fallback to monocular Essential matrix decomposition
+    ess_res: EssentialResult = estimate_pose_essential(pts_prev, pts_curr, K, ransac_threshold=ransac_threshold)
+    return PnPResult(
+        R=ess_res.R,
+        t=ess_res.t,
+        inlier_mask=ess_res.inlier_mask,
+        n_inliers=ess_res.n_inliers,
+        inlier_ratio=ess_res.inlier_ratio,
+        is_metric=False,
+        mode="essential_fallback",
+    )
