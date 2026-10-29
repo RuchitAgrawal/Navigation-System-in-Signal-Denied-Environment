@@ -35,6 +35,8 @@ VALID_COMBINATIONS = {
     ("FAST", "ORB"),
     ("ORB",  "ORB"),
     ("ORB",  "BRISK"),
+    ("FASTER", "ORB"),
+    ("FASTER", "BRIEF"),
 }
 
 
