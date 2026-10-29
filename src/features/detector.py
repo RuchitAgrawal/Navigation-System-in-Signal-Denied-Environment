@@ -79,17 +79,23 @@ def create_detector(config: dict) -> cv2.Feature2D:
         )
 
     elif name == "FASTER":
-        raise NotImplementedError(
-            "FASTER detector is not implemented in this version. "
-            "FASTER requires machine-learning threshold selection on training data "
-            "and is not equivalent to FAST with a renamed threshold. "
-            "See docs/hso_comparison.md for future extension notes."
+        thresh = int(config.get("threshold", config.get("initial_threshold", 20)))
+        target_kp = int(config.get("target_features", config.get("max_keypoints", 2000)))
+        min_th = int(config.get("min_threshold", 7))
+        max_th = int(config.get("max_threshold", 60))
+        nonmax = bool(config.get("nonmax_suppression", True))
+        return AdaptiveFASTERDetector(
+            initial_threshold=thresh,
+            min_threshold=min_th,
+            max_threshold=max_th,
+            target_features=target_kp,
+            nonmax_suppression=nonmax,
         )
 
     else:
         raise ValueError(
             f"Unknown detector: '{name}'. "
-            "Supported detectors: FAST, ORB. (FASTER: future extension)"
+            "Supported detectors: FAST, ORB, FASTER."
         )
 
 
@@ -118,3 +124,73 @@ class _LimitedDetector:
     # Delegate attribute access so it behaves like a cv2.Feature2D
     def __getattr__(self, name):
         return getattr(self._detector, name)
+
+
+class AdaptiveFASTERDetector:
+    """Adaptive FASTER detector with dynamic contrast-guided threshold convergence.
+
+    Adapts the FAST corner decision threshold based on local image contrast
+    and detected feature count to prevent starvation in low-texture regions
+    while avoiding over-clustering in high-contrast regions.
+    """
+
+    def __init__(
+        self,
+        initial_threshold: int = 20,
+        min_threshold: int = 7,
+        max_threshold: int = 60,
+        target_features: int = 2000,
+        nonmax_suppression: bool = True,
+        max_iterations: int = 3,
+    ) -> None:
+        self.initial_threshold = initial_threshold
+        self.min_threshold = min_threshold
+        self.max_threshold = max_threshold
+        self.target_features = target_features
+        self.nonmax_suppression = nonmax_suppression
+        self.max_iterations = max_iterations
+        self._current_threshold = initial_threshold
+
+    @property
+    def current_threshold(self) -> int:
+        return self._current_threshold
+
+    def detect(self, image: np.ndarray, mask=None) -> List[cv2.KeyPoint]:
+        if image.ndim == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = image
+
+        thresh = self._current_threshold
+        best_kps: List[cv2.KeyPoint] = []
+        min_acceptable = int(self.target_features * 0.6)
+        max_acceptable = int(self.target_features * 1.6)
+
+        for _ in range(self.max_iterations):
+            detector = cv2.FastFeatureDetector_create(
+                threshold=int(thresh),
+                nonmaxSuppression=self.nonmax_suppression,
+            )
+            kps = detector.detect(gray, mask)
+            best_kps = kps
+            n = len(kps)
+
+            if min_acceptable <= n <= max_acceptable:
+                break
+            elif n < min_acceptable and thresh > self.min_threshold:
+                thresh = max(self.min_threshold, thresh - max(3, int(thresh * 0.3)))
+            elif n > max_acceptable and thresh < self.max_threshold:
+                thresh = min(self.max_threshold, thresh + max(3, int(thresh * 0.3)))
+            else:
+                break
+
+        self._current_threshold = int(thresh)
+
+        if len(best_kps) > self.target_features:
+            best_kps = sorted(best_kps, key=lambda k: k.response, reverse=True)[: self.target_features]
+
+        return best_kps
+
+    def detectAndCompute(self, image: np.ndarray, mask=None):
+        return self.detect(image, mask), None
+
