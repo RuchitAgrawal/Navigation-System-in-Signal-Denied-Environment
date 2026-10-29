@@ -143,3 +143,60 @@ def distribute_quadtree(
         selected.extend(remaining[: max_features - len(selected)])
 
     return selected
+
+
+def distribute_grid(
+    keypoints: List[cv2.KeyPoint],
+    width: int,
+    height: int,
+    n_buckets_x: int = 3,
+    n_buckets_y: int = 2,
+    max_features: int = 2000,
+) -> List[cv2.KeyPoint]:
+    """Distribute keypoints using a fixed NxM grid (Perez-Grau 2017 baseline).
+
+    Parameters
+    ----------
+    keypoints : List[cv2.KeyPoint]
+        Pool of detected keypoints.
+    width, height : int
+        Image frame dimensions.
+    n_buckets_x, n_buckets_y : int
+        Number of horizontal and vertical bucket divisions (default 3x2 = 6).
+    max_features : int
+        Target total number of keypoints to retain.
+
+    Returns
+    -------
+    List[cv2.KeyPoint]
+        Keypoints selected evenly from each grid bucket.
+    """
+    if len(keypoints) <= max_features:
+        return keypoints
+
+    total_buckets = n_buckets_x * n_buckets_y
+    quota_per_bucket = max(1, max_features // total_buckets)
+    bucket_w = width / float(n_buckets_x)
+    bucket_h = height / float(n_buckets_y)
+
+    grid: List[List[cv2.KeyPoint]] = [[] for _ in range(total_buckets)]
+
+    for kp in keypoints:
+        bx = min(int(kp.pt[0] / bucket_w), n_buckets_x - 1)
+        by = min(int(kp.pt[1] / bucket_h), n_buckets_y - 1)
+        grid[by * n_buckets_x + bx].append(kp)
+
+    selected: List[cv2.KeyPoint] = []
+    for b_pts in grid:
+        b_pts.sort(key=lambda kp: kp.response, reverse=True)
+        selected.extend(b_pts[:quota_per_bucket])
+
+    # Fill remaining capacity if some buckets were starved
+    if len(selected) < max_features:
+        selected_set = {id(kp) for kp in selected}
+        remaining = [kp for kp in keypoints if id(kp) not in selected_set]
+        remaining.sort(key=lambda kp: kp.response, reverse=True)
+        selected.extend(remaining[: max_features - len(selected)])
+
+    return selected[:max_features]
+
