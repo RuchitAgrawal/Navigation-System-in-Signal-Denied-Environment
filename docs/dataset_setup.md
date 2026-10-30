@@ -13,20 +13,42 @@ required to run the visual odometry experiments.
 ```
 data/
 ├── icl_nuim/
-│   ├── living_room_traj0_loop/
-│   │   ├── rgb/            ← 0000.png, 0001.png, ...
-│   │   ├── depth/          ← (optional, not used by monocular VO)
+│   ├── living_room_traj1_loop/     ← Indoor domestic benchmark
+│   │   ├── rgb/
 │   │   ├── rgb.txt
 │   │   └── groundtruth.txt
-│   └── living_room_traj1_loop/
-│       └── (same structure)
+│   └── office_room_traj0_loop/     ← Indoor office / sharp turn benchmark
+│       ├── rgb/
+│       ├── rgb.txt
+│       └── groundtruth.txt
 │
 └── tartanair/
-    └── ocean/
-        └── Easy/
-            └── P000/
-                ├── image_left/    ← 000000.png, 000001.png, ...
-                └── pose_left.txt
+    ├── ocean/Easy/P000/            ← Outdoor open-air maritime UAV benchmark
+    │   ├── image_left/
+    │   └── pose_left.txt
+    └── abandonedfactory/Easy/P000/ ← Industrial UAV inspection benchmark
+        ├── image_left/
+        └── pose_left.txt
+```
+
+---
+
+## Quick Setup & Verification Tools
+
+### 1. Automated Benchmark Setup
+You can populate or download the benchmark sequences directly via:
+```bash
+# Generate the full 2+2 benchmark suite locally:
+python scripts/download_datasets.py --offline-suite
+
+# Or download specific official archives:
+python scripts/download_datasets.py --sequence living_room_traj1_loop
+```
+
+### 2. Verify Data Integrity
+Inspect and confirm that all sequences, frames, and intrinsics are valid:
+```bash
+python scripts/verify_dataset_integrity.py
 ```
 
 ---
