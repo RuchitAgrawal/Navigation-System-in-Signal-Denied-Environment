@@ -62,22 +62,61 @@ def save_markdown_summary(
     path: str | Path,
     title: str = "Benchmark Results",
 ) -> None:
-    """Save a Markdown table of all summary rows."""
+    """Save a Markdown table of all summary rows with executive and detailed breakdowns."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(f"# {title}\n\n")
         if not rows:
             f.write("*No results.*\n")
             return
 
-        # Header
+        # 1. Executive Summary Table
+        f.write("## 1. Executive Summary\n\n")
+        exec_cols = [
+            ("config_id", "Configuration"),
+            ("descriptor_label", "Descriptor"),
+            ("dataset", "Dataset"),
+            ("sequence", "Sequence"),
+            ("ate_rmse_m", "ATE RMSE (m)"),
+            ("rpe_trans_rmse_m", "RPE Trans (m)"),
+            ("rpe_rot_rmse_deg", "RPE Rot (deg)"),
+            ("tracking_success_pct", "Tracking %"),
+            ("mean_fps", "FPS"),
+        ]
+        f.write("| " + " | ".join(label for _, label in exec_cols) + " |\n")
+        f.write("|" + "|".join(["---"] * len(exec_cols)) + "|\n")
+        for r in rows:
+            line = "| " + " | ".join(_fmt(r.get(key, "N/A")) for key, _ in exec_cols) + " |"
+            f.write(line + "\n")
+        f.write("\n")
+
+        # 2. Timing and Computational Efficiency Breakdown
+        f.write("## 2. Computational Latency and Throughput\n\n")
+        timing_cols = [
+            ("config_id", "Configuration"),
+            ("sequence", "Sequence"),
+            ("mean_frame_time_ms", "Mean Latency (ms)"),
+            ("median_frame_time_ms", "Median Latency (ms)"),
+            ("p95_frame_time_ms", "P95 Latency (ms)"),
+            ("mean_fps", "Mean FPS"),
+            ("total_frames", "Total Frames"),
+            ("failed_frames", "Dropped Frames"),
+        ]
+        f.write("| " + " | ".join(label for _, label in timing_cols) + " |\n")
+        f.write("|" + "|".join(["---"] * len(timing_cols)) + "|\n")
+        for r in rows:
+            line = "| " + " | ".join(_fmt(r.get(key, "N/A")) for key, _ in timing_cols) + " |"
+            f.write(line + "\n")
+        f.write("\n")
+
+        # 3. Complete Raw Data
+        f.write("## 3. Complete Benchmark Raw Data\n\n")
         keys = list(rows[0].keys())
         f.write("| " + " | ".join(keys) + " |\n")
         f.write("|" + "|".join(["---"] * len(keys)) + "|\n")
 
-        # Rows
         for row in rows:
             vals = [_fmt(row.get(k)) for k in keys]
             f.write("| " + " | ".join(vals) + " |\n")
