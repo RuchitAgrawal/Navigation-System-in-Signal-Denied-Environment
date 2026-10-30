@@ -33,7 +33,7 @@ def run_benchmark(
     rpe_delta          : frame interval for RPE
     verbose            : print progress
     """
-    with open(benchmark_cfg_path) as f:
+    with open(benchmark_cfg_path, encoding="utf-8-sig") as f:
         bench_cfg = yaml.safe_load(f)
 
     exp_configs     = bench_cfg.get("configs", [])
