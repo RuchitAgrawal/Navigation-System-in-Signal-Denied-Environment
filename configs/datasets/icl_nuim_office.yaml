@@ -1,4 +1,4 @@
-﻿# ICL-NUIM Office Room Dataset Configuration
+# ICL-NUIM Office Room Dataset Configuration
 dataset: icl_nuim
 root: data/icl_nuim
 sequence: office_room_traj0_loop
@@ -18,4 +18,3 @@ assoc_tolerance: 0.02
 frame_start: null
 frame_end: null
 frame_step: 1
-

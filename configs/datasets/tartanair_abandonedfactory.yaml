@@ -1,4 +1,4 @@
-﻿# TartanAir AbandonedFactory Dataset Config
+# TartanAir AbandonedFactory Dataset Config
 dataset: tartanair
 root: data/tartanair
 environment: abandonedfactory
@@ -17,4 +17,3 @@ internal_convention: camera_to_world
 frame_start: null
 frame_end: null
 frame_step: 1
-
