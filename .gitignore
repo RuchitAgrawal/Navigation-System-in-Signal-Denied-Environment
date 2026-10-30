@@ -18,6 +18,7 @@ data/
 
 # Results (generated output)
 results/csv/*.csv
+!results/csv/benchmark_summary.csv
 results/csv/*.txt
 results/figures/*.png
 results/figures/*.pdf
