@@ -76,9 +76,17 @@ class VOPipeline:
         min_inlier_ratio: float = 0.10,
         use_motion_model: bool = True,
         use_pnp: bool = False,
+        bucketing: str = "none",
+        subpixel: bool = False,
+        max_features: int = 2000,
     ) -> None:
         self.fc = feature_config
-        self.extractor = FeatureExtractor(feature_config)
+        self.extractor = FeatureExtractor(
+            feature_config,
+            bucketing=bucketing,
+            subpixel=subpixel,
+            max_features=max_features,
+        )
         self.ransac_threshold = ransac_threshold
         self.ransac_confidence = ransac_confidence
         self.ransac_max_iter = ransac_max_iter

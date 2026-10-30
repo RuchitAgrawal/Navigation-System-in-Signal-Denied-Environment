@@ -91,9 +91,11 @@ def run_experiment(
               f"(desc impl: {desc_label})")
 
     # --- Run VO ---
-    tracking_cfg = exp_cfg.get("tracking", {})
-    ransac_cfg   = exp_cfg.get("ransac", {})
-    match_cfg    = exp_cfg.get("matching", {})
+    tracking_cfg  = exp_cfg.get("tracking", {})
+    ransac_cfg    = exp_cfg.get("ransac", {})
+    match_cfg     = exp_cfg.get("matching", {})
+    bucketing_cfg = exp_cfg.get("bucketing", {})
+    refine_cfg    = exp_cfg.get("refinement", {})
 
     pipeline = VOPipeline(
         feature_config=fc,
@@ -105,6 +107,10 @@ def run_experiment(
         min_keypoints=int(tracking_cfg.get("min_keypoints", 8)),
         min_matches=int(tracking_cfg.get("min_matches", 8)),
         min_inlier_ratio=float(tracking_cfg.get("min_inlier_ratio", 0.10)),
+        use_motion_model=bool(tracking_cfg.get("use_motion_model", True)),
+        bucketing=str(bucketing_cfg.get("strategy", "none")),
+        subpixel=bool(refine_cfg.get("subpixel", False)),
+        max_features=int(bucketing_cfg.get("max_features", 2000)),
     )
 
     t_start = time.perf_counter()
