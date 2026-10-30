@@ -1,0 +1,25 @@
+# Master 2+2 Multi-Environment Benchmark Configuration
+# Runs 5 feature pipelines across 4 indoor and outdoor sequences (20 runs total)
+
+experiment_id: benchmark_master_2x2
+description: "Comprehensive benchmark comparing Perez-Grau baseline against proposed FASTER+Quadtree across indoor and outdoor sequences"
+
+configs:
+  - configs/experiments/orb_orb.yaml
+  - configs/experiments/fast_orb.yaml
+  - configs/experiments/fast_brief.yaml
+  - configs/experiments/orb_brisk.yaml
+  - configs/experiments/faster_orb.yaml
+
+datasets:
+  - configs/datasets/icl_nuim.yaml
+  - configs/datasets/icl_nuim_office.yaml
+  - configs/datasets/tartanair.yaml
+  - configs/datasets/tartanair_abandonedfactory.yaml
+
+output:
+  root: results/
+  save_per_frame_csv: true
+  save_summary_csv: true
+  save_figures: true
+  save_logs: true
