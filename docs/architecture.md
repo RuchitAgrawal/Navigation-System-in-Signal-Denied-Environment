@@ -62,9 +62,13 @@ minor-project/
 │   ├── evaluate_trajectory.py
 │   ├── run_demo.py
 │   ├── generate_demo_data.py
+│   ├── verify_dataset_integrity.py
+│   ├── download_datasets.py
+│   ├── generate_ablation_charts.py
+│   ├── evaluate_gps_outage.py
 │   └── generate_trajectory_video.py
 │
-├── tests/                  ← Unit tests (pytest)
+├── tests/                  ← Unit tests (pytest - 144 tests)
 ├── configs/                ← YAML configuration files
 └── docs/                   ← Documentation & research report
 ```
@@ -73,7 +77,8 @@ minor-project/
 
 ## Design Principles
 
-1. **Separation of Concerns:** Feature extraction, matching, and geometry are decoupled.
-2. **Graceful Degradation:** Tracking failures never throw unhandled exceptions; previous poses are carried forward with clear diagnostics.
-3. **Reproducibility:** All experiments are driven by version-controlled YAML configuration files.
-4. **Metric Integrity:** Ground truth is strictly segregated from state estimation and used exclusively during evaluation.
+1. **Separation of Concerns:** Feature extraction, matching, and geometry are decoupled into dedicated, testable modules.
+2. **Hybrid Graceful Degradation:** When depth is available, metric 3D-to-2D PnP is executed; if depth is absent, the system degrades gracefully to monocular 5-point Essential matrix estimation.
+3. **Kinematic Prior Enforced:** RANSAC pose hypotheses are evaluated against a constant-velocity physical model to prevent orientation flips during aggressive maneuvers.
+4. **Reproducibility:** All experiments and dataset configurations are driven by version-controlled YAML files.
+5. **Metric Integrity:** Ground truth is strictly segregated from state estimation and used exclusively during evaluation.
