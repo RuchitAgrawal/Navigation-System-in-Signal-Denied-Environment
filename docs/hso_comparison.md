@@ -1,4 +1,4 @@
-﻿# HSO vs. Our Implementation â€” Comparison
+# HSO vs. Our Implementation â€” Comparison
 
 **Reference:** [HSO â€” Hybrid Sparse Visual Odometry](https://github.com/luodongting/HSO)  
 **License:** HSO is distributed under GPL-3.0.  
@@ -14,20 +14,23 @@
 
 | Aspect | HSO (reference) | Our Python Pipeline |
 |--------|----------------|---------------------|
-| **Language** | C++17 | Python 3.13 |
+| **Language** | C++17 | Python 3.10+ |
 | **License** | GPL-3.0 | MIT (own code) |
-| **Feature detection** | Custom FAST-based patch selector | FAST / ORB via OpenCV |
+| **Feature detection** | Custom FAST-based patch selector | Adaptive FASTER / FAST-9 / ORB |
+| **Spatial Distribution** | Bucket grid | Recursive Quadtree Spatial Partitioning |
+| **Sub-pixel Refinement** | Inverse compositional LK | Gradient Orthogonality (`cornerSubPix`) |
 | **Feature tracking** | Patch-based Lucas-Kanade optical flow | Descriptor matching (Hamming BFMatcher) |
 | **Descriptor** | None (direct patch comparison) | BRIEF / ORB / BRISK |
-| **Map** | Sparse 3-D point map + semi-dense depth | No persistent map (frame-to-frame only) |
-| **Geometric estimation** | Full pose graph with sliding-window BA | Essential matrix + RANSAC (cv2) |
-| **Scale** | Metric (stereo or depth initialization) | Ambiguous (monocular, Sim(3) aligned) |
+| **Map** | Sparse 3-D point map + semi-dense depth | Frame-to-frame tracking with motion prior |
+| **Geometric estimation** | Full pose graph with sliding-window BA | Hybrid RGB-D PnP + 5-Point Essential Fallback |
+| **Kinematic Model** | None (direct frame registration) | Constant-Velocity Motion Model (CVMM) Prior |
+| **Scale** | Metric (stereo or depth initialization) | Metric (via PnP depth) + Monocular Sim(3) Fallback |
 | **Loop closure** | Not in base version | Not implemented |
 | **IMU** | Not in base version | Not implemented |
-| **Dataset loaders** | TUM, EuRoC (C++ readers) | ICL-NUIM, TartanAir (Python) |
-| **Evaluation** | Internal ATE print | ATE + RPE + CSV + plots |
-| **Benchmarking** | Single-config | Multi-config comparison framework |
-| **GPS-outage sim** | Not present | Implemented (Phase 8) |
+| **Dataset loaders** | TUM, EuRoC (C++ readers) | ICL-NUIM, TartanAir 2+2 Suite (Python) |
+| **Evaluation** | Internal ATE print | ATE + RPE + Trajectory Video Dashboards + Outage Sim |
+| **Benchmarking** | Single-config | Multi-config 20-run benchmark orchestrator |
+| **GPS-outage sim** | Not present | Implemented with drift rate analysis (2.28%) |
 
 ---
 
