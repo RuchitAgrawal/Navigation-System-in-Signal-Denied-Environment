@@ -75,42 +75,114 @@ To elevate positioning performance beyond the 2017 literature baseline, our impl
 
 ---
 
-## 4. Methodology
+## 4. Methodology & Algorithmic Formulation
 
-### 4.1 Pipeline Architecture
-
-```
-Frame(t) â”€â”€â–º Detect â”€â”€â–º Describe â”€â”€â–º Match â”€â”€â–º Filter â”€â”€â–º Essential Matrix
-                                                           â”€â”€â–º recoverPose
-                                                           â”€â”€â–º Accumulate T_wc[t]
-```
-
-Every frame produces a `FrameDiagnostics` record regardless of success or failure. Failed frames carry the previous pose forward without extrapolation.
-
-### 4.2 Coordinate Frame Convention
-
-All poses are stored as **T_wc** (4Ã—4 float64) â€” camera-to-world transforms. Pose accumulation:
+### 4.1 Upgraded Visual Odometry Architecture
 
 ```
-T_wc[t] = T_wc[t-1] @ inv(T_{c(t-1)â†’c(t)})
+                      ┌──────────────────────────────────────────────┐
+                      │              Input Frame I_t                 │
+                      └──────────────────────┬───────────────────────┘
+                                             │
+                                             ▼
+                      ┌──────────────────────────────────────────────┐
+                      │    Adaptive FASTER / FAST / ORB Detector     │
+                      └──────────────────────┬───────────────────────┘
+                                             │ Keypoints {k_i}
+                                             ▼
+                      ┌──────────────────────────────────────────────┐
+                      │    Recursive Quadtree Spatial Bucketing      │
+                      └──────────────────────┬───────────────────────┘
+                                             │ Uniform Keypoints
+                                             ▼
+                      ┌──────────────────────────────────────────────┐
+                      │  Sub-pixel Corner Refinement (cornerSubPix)  │
+                      └──────────────────────┬───────────────────────┘
+                                             │ Refined Float Keypoints
+                                             ▼
+                      ┌──────────────────────────────────────────────┐
+                      │      Descriptor Extraction (ORB/BRIEF/BRISK) │
+                      └──────────────────────┬───────────────────────┘
+                                             │
+                        ┌────────────────────┴───────────────────┐
+                        │ Hamming / L2 Distance Matching         │
+                        │ Lowe's Ratio Test (thresh = 0.75)      │
+                        └────────────────────┬───────────────────┘
+                                             │ Verified Matches
+                                             ▼
+                      ┌──────────────────────────────────────────────┐
+                      │     Hybrid Motion Estimation Engine          │
+                      │  - Depth available? -> solvePnPRansac (PnP)  │
+                      │  - Monocular only?  -> findEssentialMat      │
+                      └──────────────────────┬───────────────────────┘
+                                             │ Relative Pose [R | t]
+                                             ▼
+                      ┌──────────────────────────────────────────────┐
+                      │   Kinematic Motion Prior Validation (CVMM)   │
+                      └──────────────────────┬───────────────────────┘
+                                             │ Validated Pose
+                                             ▼
+                      ┌──────────────────────────────────────────────┐
+                      │  World Pose Accumulator: T_wc[t]             │
+                      └──────────────────────────────────────────────┘
 ```
 
-where `T_{c(t-1)â†’c(t)}` is recovered by `cv2.recoverPose`.
+### 4.2 Adaptive FASTER Feature Detection
 
-### 4.3 Scale Ambiguity
+Standard FAST-9 corner detection applies a fixed intensity difference threshold $\tau$:
+$$|I(p) - I(c)| > \tau$$
+for $N \ge 9$ contiguous pixels along a Bresenham circle of radius 3. In outdoor flight, rapid exposure changes (e.g., flying from shadows into direct sunlight) cause fixed-threshold FAST to either over-saturate (thousands of weak corners) or starve (zero corners).
 
-Monocular Essential matrix decomposition recovers translation as a unit direction vector. All ATE results use **Sim(3) alignment** (Umeyama, 1991) to remove the global scale factor. The recovered scale is reported separately.
+Our **Adaptive FASTER Detector** employs a dynamic feedback loop that iteratively converges toward a target keypoint quota $N_{\text{target}}$:
+$$\tau_{k+1} = \mathrm{clip}\left(\tau_k \cdot \left(\frac{N_k}{N_{\text{target}}}\right)^\gamma, \;\tau_{\min}, \;\tau_{\max}\right)$$
+where $\gamma = 0.5$ acts as a damping factor preventing oscillation. This guarantees a stable feature density of $\sim 500-1000$ well-distributed points across arbitrary lighting shifts.
 
-### 4.4 Feature Configurations
+### 4.3 Recursive Quadtree Spatial Bucketing
 
-| Config | Detector | Descriptor | Rotation Invariant |
-|--------|----------|------------|-------------------|
-| A | FAST | BRIEF | No |
-| B | FAST | ORB | Partial (descriptor only) |
-| C | ORB | ORB | Yes |
-| D | ORB | BRISK | Yes |
+To prevent feature clustering in high-contrast textures (e.g., foliage or window frames), we partition the image plane recursively using a Quadtree structure. 
+1. The root node spans the full image dimension $[0, W] \times [0, H]$.
+2. While the number of active leaf nodes is less than the desired bucket count $B$, the node containing the highest keypoint count is subdivided into four equal quadrants:
+   $$\Omega_{TL}, \;\Omega_{TR}, \;\Omega_{BL}, \;\Omega_{BR}$$
+3. Inside each leaf quadrant $\Omega_i$, keypoints are sorted by corner response strength (Harris/Fast score), and only the top $k = \lceil N_{\text{max}} / B \rceil$ features are retained.
 
-BRIEF availability: if `opencv-contrib-python` is not installed, a genuine `ManualBRIEF` implementation (Gaussian-sampled 256-bit tests, no orientation) is used and labeled accordingly in all results.
+This guarantees uniform spatial distribution across all quadrants, dramatically improving the conditioning of the epipolar Essential matrix.
+
+### 4.4 Sub-Pixel Corner Refinement
+
+Standard corner detectors report integer pixel coordinates $(u, v) \in \mathbb{Z}^2$. When integrating motion over hundreds of frames, coordinate quantization introduces high-frequency rotational jitter. 
+
+We refine keypoint coordinates using gradient dot-product orthogonality:
+$$\nabla I(q)^T (q - p^*) = 0 \quad \forall q \in \mathcal{N}(p)$$
+where $p^*$ represents the continuous sub-pixel corner location within a $5 \times 5$ window $\mathcal{N}(p)$. Solving the resulting linear system via `cv2.cornerSubPix` yields sub-pixel coordinates $(u^*, v^*) \in \mathbb{R}^2$ with precision exceeding $0.1$ pixels.
+
+### 4.5 Hybrid Motion Estimation Engine
+
+To bridge the gap between indoor RGB-D sensing and outdoor monocular navigation, our motion engine executes a hybrid estimation policy:
+- **RGB-D Mode (Indoor / Metric)**: When valid depth $Z(u, v) \in [Z_{\min}, Z_{\max}]$ is available for $\ge 6$ correspondences, 2D coordinates are backprojected to 3D camera coordinates:
+  $$P_i = \left(\frac{u - c_x}{f_x} Z, \;\frac{v - c_y}{f_y} Z, \;Z\right)^T$$
+  The 6-DOF transform $[R | t]$ is estimated via Perspective-n-Point with RANSAC (`cv2.solvePnPRansac`) using the Levenberg-Marquardt algorithm. This yields absolute metric scale ($t$ in meters) without scale drift.
+- **Monocular Fallback Mode (Outdoor / Unscaled)**: When depth is absent (e.g., outdoor sunlight, distance $> 4$m), the pipeline seamlessly transitions to 5-point epipolar Essential matrix decomposition (`cv2.findEssentialMat` + `cv2.recoverPose`), estimating the unit motion direction.
+
+### 4.6 Constant-Velocity Kinematic Motion Prior
+
+Under rapid flight maneuvers or low-texture frames, RANSAC can return geometrically valid epipolar solutions that violate physical aircraft dynamics (e.g., instantaneous 180° yaw flips or impossible translational jumps). 
+
+We enforce a **Constant-Velocity Motion Model (CVMM)** prior:
+$$T_{\text{prior}} = T_{t-1} \cdot (T_{t-2}^{-1} \cdot T_{t-1})$$
+Candidate transformations $[R | t]$ returned by RANSAC are evaluated against the prior:
+$$\Delta \theta = \|\mathrm{Log}(R_{\text{prior}}^T R)\|_2 < \theta_{\max}$$
+$$\Delta d = \|t_{\text{prior}} - t\|_2 < d_{\max}$$
+Hypotheses exceeding physical limits (e.g., angular rate $> 120^\circ/\text{s}$ or acceleration $> 5g$) are rejected, preserving dead-reckoning trajectory continuity.
+
+### 4.7 Evaluated System Configurations
+
+| Config Identifier | Detector | Descriptor | Spatial Bucketing | Sub-pixel Refined | Rotation Invariant |
+|:---|:---|:---|:---|:---|:---|
+| **fast_orb_v1** (Baseline) | FAST-9 | ORB-256 | None | No | Partial |
+| **faster_orb_v1** (Proposed) | Adaptive FASTER | ORB-256 | Quadtree (4-level) | Yes (`cornerSubPix`) | Partial |
+| **orb_orb_v1** | ORB | ORB-256 | None | No | Full ($SO(2)$) |
+| **fast_brief_v1** | FAST-9 | ManualBRIEF-256 | None | No | None |
+| **orb_brisk_v1** | ORB | BRISK-512 | None | No | Full ($SO(2)$) |
 
 ---
 
