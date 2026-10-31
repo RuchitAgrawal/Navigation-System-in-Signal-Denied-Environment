@@ -186,15 +186,32 @@ Hypotheses exceeding physical limits (e.g., angular rate $> 120^\circ/\text{s}$ 
 
 ---
 
-## 5. Datasets
+## 5. Experimental Setup & 2+2 Multi-Environment Suite
 
-### 5.1 ICL-NUIM
+To rigorously evaluate algorithmic generalization, we employ a 2+2 multi-environment evaluation suite spanning both indoor structured settings and demanding outdoor UAV scenarios, constrained to an efficient on-disk footprint (~1 GB per dataset).
 
-Synthetic indoor benchmark with accurate ground-truth poses. We use `living_room_traj1_loop`. Camera: `fx=481.20, fy=480.00, cx=319.50, cy=239.50`. No lens distortion (synthetic).
+### 5.1 Indoor Structured Sequences (ICL-NUIM Benchmark)
+The Imperial College London / National University of Ireland Maynooth (ICL-NUIM) benchmark (Handa et al., 2014) provides photorealistic ray-traced RGB-D imagery paired with millimeter-accurate ground-truth trajectory poses:
+1. **Living Room (`living_room_traj1_loop`)**: Smooth looping trajectory featuring planar walls, furniture, specular reflections, and realistic indoor lighting transitions.
+2. **Office Room (`office_room_traj0_loop`)**: Dense office scene featuring repetitive desk geometry, occlusions, and dynamic perspective warping.
+- *Intrinsics*: $f_x = 481.20, f_y = 480.00, c_x = 319.50, c_y = 239.50$, resolution $640 \times 480$ px. Zero lens distortion.
 
-### 5.2 TartanAir
+### 5.2 Outdoor UAV Sequences (TartanAir Benchmark)
+The TartanAir benchmark (Wang et al., 2020) provides challenging drone flight trajectories collected in Unreal Engine with dynamic environmental physics:
+1. **Ocean (`ocean_Easy_P000`)**: Low-altitude coastal UAV flight over dynamic ocean waves and open water, exhibiting severe texture deficiency, visual repetition, and missing static epipolar landmarks.
+2. **Abandoned Factory (`abandonedfactory_Easy_P000`)**: Complex industrial inspection flight through degraded factory infrastructure, featuring extreme shadows, repetitive metal scaffolding, and rapid 3D rotational dynamics.
+- *Intrinsics*: $f_x = f_y = 320.00, c_x = 320.00, c_y = 240.00$, resolution $640 \times 480$ px.
+- *Coordinate Conversion*: TartanAir ground-truth poses are logged in North-East-Down (NED) body coordinates. Our loader converts these into the standard optical camera coordinate frame ($X$ right, $Y$ down, $Z$ forward) prior to metric trajectory evaluation:
+  $$R_{\text{cam}} = R_{\text{NED}} \cdot R_{\text{body}\to\text{cam}}$$
 
-Large-scale multi-environment synthetic dataset. We use `ocean/Easy/P000`. Camera: `fx=fy=320.0, cx=320.0, cy=240.0`. Poses are converted from NED body frame to camera frame before evaluation.
+### 5.3 Quantitative Performance Metrics
+Evaluation is performed under rigorous SLAM standards (Sturm et al., 2012):
+- **Absolute Trajectory Error (ATE RMSE)**: Computes global trajectory alignment via Umeyama Sim(3) similarity transformation:
+  $$\mathrm{ATE}_{\mathrm{RMSE}} = \sqrt{\frac{1}{N} \sum_{i=1}^N \|p_{\mathrm{gt}, i} - (s R p_{\mathrm{est}, i} + t)\|^2}$$
+- **Relative Pose Error (RPE)**: Frame-to-frame rotational ($\mathrm{deg}/\mathrm{frame}$) and translational drift ($\mathrm{m}/\mathrm{frame}$) at interval $\Delta = 1$:
+  $$\Delta T_i = (T_{\mathrm{gt}, i}^{-1} T_{\mathrm{gt}, i+\Delta})^{-1} (T_{\mathrm{est}, i}^{-1} T_{\mathrm{est}, i+\Delta})$$
+- **Tracking Robustness**: Percentage of successfully registered frames ($N_{\mathrm{success}} / N_{\mathrm{total}} \times 100\%$).
+- **Computational Speed**: Mean processing throughput in Frames Per Second (FPS) and per-frame latency in milliseconds.
 
 ---
 
