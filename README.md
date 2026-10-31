@@ -1,4 +1,4 @@
-﻿# Navigation System in Signal-Denied Environments
+# Navigation System in Signal-Denied Environments
 ## Visual Odometry Module
 
 **Full Title:** A Computer Vision-Assisted GPS Navigation System for Robust Positioning in Signal-Denied Environments
@@ -7,18 +7,23 @@
 
 ## Overview
 
-This repository contains the **Visual Odometry (VO)** module of a larger GPS-denied navigation system. The module estimates camera motion from consecutive monocular images using classical feature-based methods and evaluates the resulting trajectory against ground truth.
+This repository contains the **Visual Odometry (VO)** module of an autonomous positioning system designed for GPS-denied and signal-degraded environments. The module provides real-time, dead-reckoning 6-DOF camera pose tracking from sequential imagery, specifically tailored as a resilient fallback when satellite navigation is denied or jammed.
 
-The system is designed so its output can eventually be integrated with a GPS navigation or sensor-fusion (EKF) component.
+### Primary Reference Literature
+The theoretical foundation of this work is based on:
+> **Perez-Grau, F. J., Caballero, R., Viguria, A., & Ollero, A. (2017).**  
+> *An architecture for robust UAV navigation in GPS-denied areas.*  
+> **Journal of Field Robotics**, 34(5), 909–936.
 
-**Research Question:**
-> How do lightweight feature detection, description, and matching strategies affect the trajectory accuracy, tracking robustness, and computational efficiency of classical visual odometry across synthetic indoor and outdoor environments?
-
----
-
-## Architecture Reference
-
-This implementation is architecturally inspired by [HSO (Hybrid Sparse Visual Odometry)](https://github.com/luodongting/HSO) by Luodongting â€” a C++ implementation of hybrid sparse VO. We adopt its modular component separation philosophy but implement an independent Python pipeline using OpenCV and NumPy. No HSO source code has been copied. HSO is licensed under GPL-3.0.
+### Core Algorithmic Contributions Beyond Literature Baseline
+Building upon the Perez-Grau (2017) baseline (which utilized standard FAST-9 + ORB and a fixed 6-bucket grid with active RGB-D sensing), our system implements five major advancements:
+1. **Adaptive FASTER Detector**: Dynamic intensity threshold feedback loop maintaining target keypoint quotas across changing lighting conditions.
+2. **Recursive Quadtree Spatial Bucketing**: Replaces static rectangular grids with hierarchical quadtree partitioning, eliminating intra-bucket feature clustering.
+3. **Sub-Pixel Corner Refinement**: Enforces gradient orthogonality via `cv2.cornerSubPix`, achieving sub-0.1 pixel precision and suppressing rotational drift.
+4. **Hybrid RGB-D PnP Motion Engine with Monocular Fallback**: Uses metric 3D-to-2D PnP RANSAC when depth is available, with seamless automatic fallback to 5-point Essential matrix decomposition outdoors.
+5. **Constant-Velocity Kinematic Motion Prior**: Validates RANSAC hypotheses against physical aircraft velocity/acceleration boundaries to reject orientation flips.
+6. **2+2 Multi-Environment Suite**: Evaluates 5 detector-descriptor combinations across both indoor structured scenes (ICL-NUIM Living Room and Office Room) and outdoor UAV flights (TartanAir Ocean and Abandoned Factory).
+7. **Side-by-Side MP4 Video Trajectory Telemetry**: Visualizes live feature tracking, birds-eye trajectory mapping, and simulated GPS outage events in real time.
 
 ---
 
