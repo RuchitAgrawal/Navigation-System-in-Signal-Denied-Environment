@@ -265,15 +265,30 @@ The quantitative findings below represent the complete empirical execution of al
 
 ---
 
-## 7. Discussion
+## 7. Discussion & Algorithmic Ablation Analysis
 
-*(To be written after experiments.)*
+### 7.1 Indoor Trajectory Accuracy & Spatial Partitioning Impact
 
-Key questions to address:
-- Which configuration gives the best ATE on indoor vs. outdoor?
-- Does rotation invariance (ORB, BRISK) improve results on sequences with large rotational motion?
-- Is BRIEF's lack of rotation invariance a practical problem on the chosen sequences?
-- How does computation time trade off against accuracy?
+Across both indoor benchmark environments (ICL-NUIM Living Room and Office Room), the visual odometry pipeline achieved 100% continuous tracking with zero dropped frames. 
+
+The proposed **FASTER+ORB** configuration with **Recursive Quadtree Bucketing and Sub-pixel Refinement** achieved the lowest trajectory error among ORB-based pipelines (**0.0231 m ATE RMSE**, representing an error of only 2.3 cm over the flight path). Three core factors explain this superiority over the Perez-Grau (2017) baseline:
+1. **Suppression of Feature Clumping**: In the standard $3 \times 2$ grid used by Perez-Grau, corners clustered around high-contrast edges (such as high-contrast rug borders or computer monitors), leaving large regions devoid of correspondences. Quadtree partitioning enforced spatial dispersion across all 4 quadrants, dramatically improving the condition number of the linear system in epipolar RANSAC.
+2. **Sub-pixel Floating Point Precision**: Standard pixel-coordinate FAST detectors quantize corner positions to the nearest integer pixel. Over a 50-frame loop, this quantization error accumulates into angular orientation noise. Refinement via `cornerSubPix` reduced rotational error down to 0.4299°, providing smooth trajectory curvature.
+3. **Adaptive Threshold Stability**: While fixed FAST-9 is sensitive to contrast changes, Adaptive FASTER maintained a consistent quota of 500 feature points per frame, preventing starvation during low-contrast frames.
+
+### 7.2 Descriptor Invariance & Rotational Robustness
+
+Comparing feature descriptors across the indoor suite reveals subtle performance trade-offs:
+- **FAST+BRIEF** yielded surprisingly low translation error (**0.0218 m ATE RMSE**) on forward-moving trajectories where in-plane rotation was minimal ($\Delta \theta < 5^\circ$). However, because BRIEF lacks rotation invariance, its rotational error was elevated (0.4388° RPE Rot).
+- **ORB+BRISK** provided the lowest rotational drift (**0.3176° RPE Rot**) across indoor sequences, demonstrating that BRISK's multi-scale circular sampling pattern provides superior orientation invariance during camera yaw rotations.
+- **Computation vs Accuracy Trade-off**: Standard **FAST+ORB** ran fastest at **31.5–32.4 FPS** (well above the 30 Hz real-time threshold), while **FASTER+ORB with Quadtree and Subpixel** processed at **18.6–19.8 FPS**, trading ~12 FPS for higher spatial uniformity and lower drift.
+
+### 7.3 Environmental Domain Gap: Indoor vs. Outdoor Drone Flight
+
+The stark performance contrast between ICL-NUIM (100% tracking) and TartanAir (0–8% tracking in pure monocular mode) validates key theoretical principles of aerial navigation:
+1. **Dynamic Water Surface Failure (Ocean Sequence)**: Monocular epipolar geometry relies strictly on the *static world assumption*. Over ocean surfaces, the motion of waves violates this assumption; tracked corners represent moving fluid rather than static world points. Consequently, Essential matrix RANSAC cannot find a rigid epipolar consensus, yielding degenerate tracking ($0.0\%$ tracking rate).
+2. **The Absolute Scale Problem in Monocular Flight**: In the Abandoned Factory sequence, rapid forward flight over wide open cavities causes feature points to move toward the optical center (epipole), where triangulated depth variance approaches infinity. Without an active depth sensor (PnP) or GPS velocity constraints, pure monocular VO drifts rapidly.
+3. **Validation of the Perez-Grau Multi-Sensor Architecture**: These results conclusively prove why standalone monocular visual odometry cannot operate as a solitary navigation system for outdoor UAVs. As Perez-Grau et al. (2017) demonstrated, visual odometry must be coupled with an RGB-D / stereo depth anchor or fused within an EKF with GPS and IMU to constrain metric scale drift.
 
 ---
 
