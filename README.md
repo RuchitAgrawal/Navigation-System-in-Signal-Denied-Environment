@@ -61,22 +61,43 @@ python scripts/verify_dataset_integrity.py
 
 ---
 
-## Running Experiments
+## Quickstart: Running the Visual Odometry Suite
 
-### Single VO run
-```bash
-python scripts/run_vo.py --config configs/experiments/orb_orb.yaml --dataset icl_nuim
-```
+### 1. Run the Full 20-Run Multi-Environment Benchmark
+Executes all 5 feature configurations across the 4 sequences (20 runs total), logging trajectory errors and runtime:
+`ash
+python experiments/benchmark.py
+`
 
-### Evaluate a saved trajectory
-```bash
-python scripts/evaluate_trajectory.py --est results/csv/orb_orb_icl_traj.txt --gt data/icl_nuim/living_room_traj1_loop/groundtruth.txt
-```
+### 2. Generate Publication-Quality Ablation Charts
+Produces comparative ATE RMSE, tracking stability, and latency distribution charts:
+`ash
+python scripts/generate_ablation_charts.py
+# Outputs saved to results/figures/ablation_*.png
+`
 
-### Full benchmark (all configs)
-```bash
-python scripts/run_benchmark.py --dataset icl_nuim
-```
+### 3. Evaluate GPS Outage Dead-Reckoning Drift
+Simulates sudden satellite loss at Frame 15 and measures dead-reckoning trajectory drift:
+`ash
+python scripts/evaluate_gps_outage.py \
+    --traj results/csv/faster_orb_v1__icl_nuim__living_room_traj1_loop_trajectory.txt \
+    --gt data/icl_nuim/living_room_traj1_loop/groundtruth.txt \
+    --outage-start 15
+`
+
+### 4. Render Animated Trajectory & HUD Video Dashboard
+Generates a side-by-side animated MP4 showing live feature tracking, birds-eye trajectory, and GPS carrier telemetry:
+`ash
+python scripts/generate_trajectory_video.py \
+    --dataset-cfg configs/datasets/icl_nuim.yaml \
+    --exp-cfg configs/experiments/faster_orb.yaml \
+    --output results/figures/vo_trajectory_demo.mp4
+`
+
+### 5. Run Fast End-to-End Demo
+`ash
+python scripts/run_demo.py
+`
 
 ---
 
