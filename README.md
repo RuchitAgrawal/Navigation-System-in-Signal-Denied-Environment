@@ -27,15 +27,15 @@ Building upon the Perez-Grau (2017) baseline (which utilized standard FAST-9 + O
 
 ---
 
-## Feature Configurations
+## Feature Detection & Matching Configurations
 
-| Config ID | Detector | Descriptor | Matcher | Status |
-|-----------|----------|------------|---------|--------|
-| A | FAST | BRIEF | Hamming BFMatcher | âœ… Implemented |
-| B | FAST | ORB | Hamming BFMatcher | âœ… Implemented |
-| C | ORB | ORB | Hamming BFMatcher | âœ… Baseline |
-| D | ORB | BRISK | Hamming BFMatcher | âœ… Implemented |
-| E | FASTER | â€” | â€” | âš ï¸ Future extension |
+| Config ID | Detector | Descriptor | Spatial Bucketing | Sub-pixel Refined | Matcher | Status |
+|:---|:---|:---|:---:|:---:|:---|:---:|
+| **fast_orb_v1** | FAST-9 | ORB-256 | None | No | Hamming BFMatcher | Implemented (Baseline) |
+| **faster_orb_v1** | Adaptive FASTER | ORB-256 | **Quadtree** | **Yes (cornerSubPix)** | Hamming BFMatcher | **Proposed Engine** |
+| **orb_orb_v1** | ORB | ORB-256 | None | No | Hamming BFMatcher | Implemented |
+| **fast_brief_v1** | FAST-9 | ManualBRIEF-256 | None | No | Hamming BFMatcher | Implemented |
+| **orb_brisk_v1** | ORB | BRISK-512 | None | No | Hamming BFMatcher | Implemented |
 
 ---
 
