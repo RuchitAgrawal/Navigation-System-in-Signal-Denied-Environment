@@ -42,24 +42,36 @@ This project builds upon the Perez-Grau framework to engineer a significantly im
 
 ---
 
-## 3. Related Work
+## 3. Related Work & Baseline Architectural Analysis
 
-### 3.1 Classical Visual Odometry
+### 3.1 Foundational Visual Odometry
 
-Feature-based monocular VO (Nister et al., 2004) estimates relative camera pose from 2-D point correspondences using the essential matrix. ORB-SLAM (Mur-Artal et al., 2015) extended this into a full SLAM system with loop closure and bundle adjustment. Our pipeline focuses on the core frame-to-frame estimation without map management.
+Monocular feature-based visual odometry relies on the epipolar constraint between consecutive image frames (Nistér, 2004; Hartley & Zisserman, 2004). For calibrated pinhole cameras with known intrinsics matrix $K$, calibrated normalized coordinates $x, x'$ satisfy the epipolar condition:
+$$x'^T E x = 0$$
+where $E = [t]_\times R$ is the Essential matrix. SVD decomposition of $E$ recovers the relative camera rotation $R \in SO(3)$ and unit translation direction $t \in \mathbb{R}^3$, subject to a four-fold ambiguity resolved by cheirality (positive scene depth) checks.
 
-### 3.2 Reference: HSO
+ORB-SLAM (Mur-Artal et al., 2015) and HSO (Luodongting, 2022) established state-of-the-art benchmarks for full SLAM and hybrid sparse VO, respectively. However, in resource-constrained embedded UAV flight controllers, full bundle adjustment and global map tracking introduce unpredictable CPU latency spikes that threaten flight stability. Consequently, lightweight frame-to-frame VO architectures remain vital.
 
-HSO (Luodongting, 2022) is a hybrid sparse VO system in C++ that combines FAST-based detection with direct patch tracking and a sliding-window bundle adjuster. We use HSO as an architectural reference for modular component separation and trajectory output conventions. No HSO source code is included; see `docs/hso_comparison.md` for a detailed comparison.
+### 3.2 The Perez-Grau et al. (2017) Baseline
 
-### 3.3 Feature Algorithms
+Perez-Grau et al. (*Journal of Field Robotics*, 2017) introduced an autonomous multi-rotor UAV framework for industrial inspection in GPS-denied tunnels. The visual odometry pipeline in their system employed:
+- **Detector**: FAST-9 corner detection (Rosten & Drummond, 2006).
+- **Descriptor**: ORB 256-bit binary descriptors (Rublee et al., 2011).
+- **Spatial Distribution**: Fixed $3 \times 2$ grid (6 uniform rectangular buckets) with a cap of $M$ features per cell to counteract high-contrast clustering.
+- **Sensor**: ASUS Xtion Pro Live active RGB-D structured-light sensor.
+- **Motion Solver**: 3D-to-2D Perspective-n-Point (PnP) when depth was available, without a graceful monocular fallback for long-range outdoor flight.
 
-| Method | Reference | Type |
-|--------|-----------|------|
-| FAST | Rosten & Drummond, 2006 | Detector |
-| ORB | Rublee et al., 2011 | Detector + Descriptor |
-| BRIEF | Calonder et al., 2010 | Descriptor (binary, not rotation-invariant) |
-| BRISK | Leutenegger et al., 2011 | Descriptor (binary, scale/rotation-invariant) |
+### 3.3 Proposed Algorithmic Enhancements vs. Perez-Grau (2017)
+
+To elevate positioning performance beyond the 2017 literature baseline, our implementation integrates four targeted algorithmic advancements:
+
+| Architectural Component | Perez-Grau et al. (2017) Baseline | Proposed Advanced VO Pipeline | Algorithmic Benefit |
+|:---|:---|:---|:---|
+| **Corner Detection** | Standard FAST-9 (fixed threshold) | **Adaptive FASTER Detector** | Dynamic threshold convergence guaranteeing uniform feature count across lighting shifts |
+| **Spatial Distribution** | Fixed $3 \times 2$ uniform grid (6 buckets) | **Recursive Quadtree Partitioning** | Enforces hierarchical planar dispersion; eliminates intra-bucket clustering |
+| **Coordinate Accuracy** | Integer pixel discretization | **Sub-pixel Refinement (`cornerSubPix`)** | Gradient-based floating-point precision, suppressing rotational angular jitter |
+| **Motion Estimation** | Rigid RGB-D PnP only (range limited <4m) | **Hybrid PnP + 5-Point Essential Fallback** | Full metric tracking indoor; seamless monocular fallback outdoor |
+| **Kinematic Validation** | Raw RANSAC pose acceptance | **Constant-Velocity Motion Prior** | Rejects unphysical orientation flips and degenerate epipolar solutions |
 
 ---
 
