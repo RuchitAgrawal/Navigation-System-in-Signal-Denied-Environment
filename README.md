@@ -39,57 +39,25 @@ Building upon the Perez-Grau (2017) baseline (which utilized standard FAST-9 + O
 
 ---
 
-## Datasets
+## 2+2 Multi-Environment Benchmark Suite
 
-- **ICL-NUIM** â€” Synthetic indoor RGB-D benchmark ([link](https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html))
-- **TartanAir** â€” Large-scale synthetic multi-environment dataset ([link](https://tartanair.org/))
+To evaluate performance across contrasting operational regimes under a lightweight storage footprint (~1 GB per dataset), the system benchmarks four distinct environments:
 
----
+1. **ICL-NUIM (Indoor Photorealistic RGB-D)**:
+   - living_room_traj1_loop (50 frames): Smooth looping camera path, planar walls, specular highlights.
+   - office_room_traj0_loop (50 frames): Dense office furniture, repetitive structures, occlusions.
+2. **TartanAir (Outdoor UAV Flight)**:
+   - ocean_Easy_P000 (50 frames): Low-altitude coastal drone flight, dynamic wave reflection, visual aliasing.
+   - bandonedfactory_Easy_P000 (50 frames): Industrial inspection flight, extreme shadows, structural scaffolding.
 
-## Installation
+### Automated Dataset Setup & Integrity Verification
+`ash
+# 1. Generate or download the 2+2 benchmark suite into data/
+python scripts/download_datasets.py --offline-suite
 
-```bash
-# Clone the repository
-git clone https://github.com/RuchitAgrawal/Navigation-System-in-Signal-Denied-Environment.git
-cd Navigation-System-in-Signal-Denied-Environment
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Editable install (recommended for development)
-pip install -e .
-```
-
----
-
-## Dataset Setup
-
-### ICL-NUIM
-Download the `living_room_traj1_loop` sequence from the [ICL-NUIM page](https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html) (TUM RGB-D compatible format).
-
-```
-data/
-  icl_nuim/
-    living_room_traj1_loop/
-      rgb/          # 0000.png, 0001.png, ...
-      groundtruth.txt
-      rgb.txt
-```
-
-Configure the path in `configs/datasets/icl_nuim.yaml`.
-
-### TartanAir
-Download one trajectory from the [TartanAir dataset](https://tartanair.org/) (e.g., `ocean/Easy/P000`).
-
-```
-data/
-  tartanair/
-    ocean/Easy/P000/
-      image_left/   # 000000.png, ...
-      pose_left.txt
-```
-
-Configure the path in `configs/datasets/tartanair.yaml`.
+# 2. Verify dataset checksums, image dimensions, and ground-truth alignments
+python scripts/verify_dataset_integrity.py
+`
 
 ---
 
