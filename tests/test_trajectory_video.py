@@ -36,3 +36,32 @@ def test_video_generator_execution(tmp_path):
         assert frame.shape[0] == 480
         assert frame.shape[1] == 1120  # 640 + 480
         cap.release()
+
+
+def test_video_generator_missing_traj_raises(tmp_path):
+    with pytest.raises(FileNotFoundError):
+        generate_video(
+            dataset_cfg_path="configs/datasets/icl_nuim.yaml",
+            experiment_cfg_path="configs/experiments/faster_orb.yaml",
+            traj_tum_path="non_existent_trajectory.txt",
+            output_video_path=tmp_path / "fail.mp4",
+        )
+
+
+def test_video_generator_office_sequence(tmp_path):
+    dataset_cfg = "configs/datasets/icl_nuim_office.yaml"
+    exp_cfg = "configs/experiments/faster_orb.yaml"
+    traj_path = "results/csv/faster_orb_v1__icl_nuim__office_room_traj0_loop_trajectory.txt"
+    out_video = tmp_path / "test_office.mp4"
+
+    if Path(dataset_cfg).exists() and Path(traj_path).exists():
+        video_path = generate_video(
+            dataset_cfg_path=dataset_cfg,
+            experiment_cfg_path=exp_cfg,
+            traj_tum_path=traj_path,
+            output_video_path=out_video,
+            fps=10,
+            max_frames=4,
+        )
+        assert video_path.exists()
+        assert video_path.stat().st_size > 500
