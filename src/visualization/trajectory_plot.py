@@ -128,6 +128,74 @@ def plot_ate_over_time(
     plt.close(fig)
 
 
+def plot_trajectory_3d(
+    ate_result: ATEResult,
+    config_id: str,
+    dataset_name: str,
+    sequence_name: str,
+    save_path: str | Path,
+    show: bool = False,
+) -> None:
+    """Plot full 3D trajectory comparison with start/end markers and error vectors."""
+    from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+
+    fig = plt.figure(figsize=(10, 8), dpi=150)
+    ax = fig.add_subplot(111, projection="3d")
+
+    gt = ate_result.gt_positions
+    est = ate_result.aligned_est_positions
+
+    # Plot trajectories in 3D
+    ax.plot(gt[:, 0], gt[:, 1], gt[:, 2], color=COLORS["gt"], linewidth=2.0, label="Ground Truth", zorder=3)
+    ax.plot(
+        est[:, 0],
+        est[:, 1],
+        est[:, 2],
+        color=COLORS["aligned"],
+        linewidth=1.8,
+        linestyle="--",
+        label=f"Estimated ({ate_result.alignment.upper()} aligned)",
+        zorder=4,
+    )
+
+    # Start and terminus points
+    ax.scatter(gt[0, 0], gt[0, 1], gt[0, 2], color="black", s=80, marker="o", label="Start (GT)")
+    ax.scatter(gt[-1, 0], gt[-1, 1], gt[-1, 2], color="red", s=80, marker="^", label="End (GT)")
+    ax.scatter(est[-1, 0], est[-1, 1], est[-1, 2], color="blue", s=80, marker="^", label="End (Est)")
+
+    # Draw subset of error vectors
+    step = max(1, len(gt) // 20)
+    for i in range(0, len(gt), step):
+        ax.plot(
+            [gt[i, 0], est[i, 0]],
+            [gt[i, 1], est[i, 1]],
+            [gt[i, 2], est[i, 2]],
+            color=COLORS["error"],
+            alpha=0.6,
+            linewidth=0.8,
+        )
+
+    ax.set_title(
+        f"3D Trajectory — {config_id.upper()} | {dataset_name} ({sequence_name})\n"
+        f"ATE RMSE: {ate_result.rmse:.4f} m | Scale: {ate_result.scale:.4f}",
+        fontsize=11,
+        fontweight="bold",
+        pad=15,
+    )
+    ax.set_xlabel("X (m)", fontsize=10)
+    ax.set_ylabel("Y (m)", fontsize=10)
+    ax.set_zlabel("Z (m)", fontsize=10)
+    ax.legend(fontsize=8, loc="upper right")
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_path, bbox_inches="tight")
+    if show:
+        plt.show()
+    plt.close(fig)
+
+
 def plot_benchmark_comparison(
     summary_rows: list,
     dataset_name: str,
