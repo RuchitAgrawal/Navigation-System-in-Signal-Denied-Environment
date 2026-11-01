@@ -150,6 +150,34 @@ def ned_body_to_camera_pose(t_ned: np.ndarray,
 
 
 # ---------------------------------------------------------------------------
+# Euler Angles and Angle-Axis (Rodrigues) Conversions
+# ---------------------------------------------------------------------------
+
+def rotation_to_euler_angles(R: np.ndarray, seq: str = "xyz", degrees: bool = True) -> np.ndarray:
+    """Convert a 3x3 rotation matrix to Euler angles (e.g. roll, pitch, yaw)."""
+    rot = Rotation.from_matrix(R)
+    return rot.as_euler(seq, degrees=degrees)
+
+
+def euler_angles_to_rotation(euler_angles: np.ndarray | list, seq: str = "xyz", degrees: bool = True) -> np.ndarray:
+    """Convert Euler angles (e.g. roll, pitch, yaw) to a 3x3 rotation matrix."""
+    rot = Rotation.from_euler(seq, euler_angles, degrees=degrees)
+    return rot.as_matrix()
+
+
+def rotation_to_rodrigues(R: np.ndarray) -> np.ndarray:
+    """Convert a 3x3 rotation matrix to a Rodrigues rotation vector (angle-axis)."""
+    rot = Rotation.from_matrix(R)
+    return rot.as_rotvec()
+
+
+def rodrigues_to_rotation(rvec: np.ndarray) -> np.ndarray:
+    """Convert a Rodrigues rotation vector (angle-axis) to a 3x3 rotation matrix."""
+    rot = Rotation.from_rotvec(rvec)
+    return rot.as_matrix()
+
+
+# ---------------------------------------------------------------------------
 # Validation helpers (used in unit tests)
 # ---------------------------------------------------------------------------
 
