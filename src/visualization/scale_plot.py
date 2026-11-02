@@ -35,10 +35,29 @@ def plot_scale_drift(
     finite = np.isfinite(scales)
 
     if np.any(finite):
-        ax.plot(frames[finite], scales[finite], color="#0d6efd", linewidth=1.2)
+        ax.plot(frames[finite], scales[finite], color="#0d6efd", linewidth=1.2, label="Local Scale")
         ax.fill_between(frames[finite], scales[finite], 1.0, alpha=0.2, color="#0d6efd")
 
-    ax.axhline(1.0, color="black", linestyle="--", linewidth=1.0, label="Scale=1 (ideal)")
+        # Add moving average trendline
+        if len(scales[finite]) >= 5:
+            kernel = np.ones(5) / 5
+            trend = np.convolve(scales[finite], kernel, mode="same")
+            ax.plot(frames[finite], trend, color="#dc3545", linestyle=":", linewidth=1.5, label="Trend (MA-5)")
+
+        mean_val = float(np.mean(scales[finite]))
+        std_val = float(np.std(scales[finite]))
+        stats_txt = f"Mean: {mean_val:.3f}\nStd:  {std_val:.3f}"
+        ax.text(
+            0.02,
+            0.95,
+            stats_txt,
+            transform=ax.transAxes,
+            fontsize=9,
+            verticalalignment="top",
+            bbox=dict(boxstyle="round,pad=0.4", facecolor="white", alpha=0.8),
+        )
+
+    ax.axhline(1.0, color="black", linestyle="--", linewidth=1.0, label="Scale=1.0 (ideal)")
     ax.set_xlabel("Frame Index")
     ax.set_ylabel("Local Scale (est / GT)")
     ax.set_title(
