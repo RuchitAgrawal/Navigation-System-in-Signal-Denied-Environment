@@ -1,0 +1,41 @@
+# Configuration: Adaptive FASTER + ORB + Perez-Grau 2017 Fixed Grid Bucketing
+# Ablation baseline comparing static 6-bucket grid vs. recursive Quadtree
+
+experiment_id: faster_orb_grid_v1
+description: "Adaptive FASTER with ORB descriptor and Perez-Grau 6-bucket static grid"
+
+detector:
+  name: FASTER
+  initial_threshold: 20
+  min_threshold: 7
+  max_threshold: 60
+  target_features: 2000
+  nonmax_suppression: true
+
+descriptor:
+  name: ORB
+
+bucketing:
+  strategy: grid
+  n_rows: 2
+  n_cols: 3
+  max_features: 2000
+
+refinement:
+  subpixel: true
+  win_size: [5, 5]
+
+matching:
+  norm_type: NORM_HAMMING
+  cross_check: true
+  ratio_threshold: 0.75
+
+ransac:
+  threshold: 1.0
+  confidence: 0.999
+  max_iterations: 2000
+
+tracking:
+  min_keypoints: 8
+  min_matches: 8
+  min_inlier_ratio: 0.10
