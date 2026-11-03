@@ -33,6 +33,7 @@ def parse_args():
     p.add_argument("-o", "--output", default="results")
     p.add_argument("--window", type=int, default=10,
                    help="Sliding window size for local scale estimation.")
+    p.add_argument("--plot", default=None, help="Optional output PNG path for scale drift plot")
     return p.parse_args()
 
 
@@ -46,6 +47,7 @@ def main():
 
     # Load saved accumulator poses from TUM file
     from src.geometry.pose import PoseAccumulator
+    from src.visualization.scale_plot import plot_scale_drift
     exp_cfg = load_yaml(args.experiment)
     exp_id  = exp_cfg["experiment_id"]
     seq     = ds_cfg.get("sequence", "seq")
@@ -67,6 +69,11 @@ def main():
         print(f"  Frames analysed    : {len(finite)}")
     else:
         print("  No valid scale frames (check GT poses and trajectory length).")
+
+    if args.plot:
+        plot_path = Path(args.plot)
+        plot_scale_drift(scales, exp_id, ds_cfg['dataset'], plot_path, window=args.window)
+        print(f"Saved scale drift plot: {plot_path}")
 
 
 if __name__ == "__main__":
