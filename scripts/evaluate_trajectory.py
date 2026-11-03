@@ -35,6 +35,7 @@ def parse_args():
                         help="Path to ground-truth trajectory (TUM format).")
     parser.add_argument("--alignment", choices=["sim3", "se3"], default="sim3")
     parser.add_argument("--rpe-delta", type=int, default=1)
+    parser.add_argument("--json-out", default=None, help="Optional output path to export JSON metrics")
     return parser.parse_args()
 
 
@@ -73,6 +74,27 @@ def main():
     print(f"  Trans mean : {rpe.trans_mean:.6f} m")
     print(f"  Rot RMSE   : {rpe.rot_rmse_deg:.4f} deg")
     print(f"  Pairs      : {rpe.n_pairs}")
+
+    if args.json_out:
+        import json
+        metrics_dict = {
+            "alignment": args.alignment,
+            "ate_rmse_m": float(ate.rmse),
+            "ate_mean_m": float(ate.mean),
+            "ate_median_m": float(ate.median),
+            "ate_std_m": float(ate.std),
+            "ate_scale": float(ate.scale),
+            "ate_n_frames": int(ate.n_frames),
+            "rpe_trans_rmse_m": float(rpe.trans_rmse),
+            "rpe_trans_mean_m": float(rpe.trans_mean),
+            "rpe_rot_rmse_deg": float(rpe.rot_rmse_deg),
+            "rpe_n_pairs": int(rpe.n_pairs),
+        }
+        json_path = Path(args.json_out)
+        json_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(metrics_dict, f, indent=2)
+        print(f"\nSaved metrics JSON: {json_path}")
 
 
 if __name__ == "__main__":
