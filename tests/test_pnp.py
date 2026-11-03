@@ -82,3 +82,4 @@ class TestHybridEstimatePose:
         res = hybrid_estimate_pose(pts_prev, pts_curr, K, depth_prev=None)
         assert res.mode == "essential_fallback"
         assert not res.is_metric
+

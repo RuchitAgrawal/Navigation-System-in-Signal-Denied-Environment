@@ -73,3 +73,4 @@
 | Dead-Reckoning Drift Rate | **2.28%** of distance traveled |
 | Unit Test Suite Coverage | **100% pass rate** across **144 test cases** |
 | Benchmark Scope | 20 runs (5 feature configs $\times$ 4 multi-environment sequences) |
+

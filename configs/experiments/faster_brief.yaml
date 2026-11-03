@@ -40,3 +40,4 @@ tracking:
   min_keypoints: 8
   min_matches: 8
   min_inlier_ratio: 0.10
+

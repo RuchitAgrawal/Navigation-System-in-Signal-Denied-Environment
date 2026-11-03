@@ -93,3 +93,4 @@ def filter_outlier_steps(
             filtered.append(curr_p.copy())
 
     return filtered
+

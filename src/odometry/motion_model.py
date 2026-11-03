@@ -151,3 +151,4 @@ class ConstantVelocityMotionModel:
         self._last_t = t_accepted.reshape(3, 1).copy()
         self._last_ts = timestamp
         self._initialized = True
+

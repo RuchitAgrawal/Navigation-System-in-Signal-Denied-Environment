@@ -38,3 +38,4 @@ class TestRefineKeypointsSubpixel:
         # Coordinates must be valid within the image bounds
         assert 0 <= refined[0].pt[0] < 100
         assert 0 <= refined[0].pt[1] < 100
+

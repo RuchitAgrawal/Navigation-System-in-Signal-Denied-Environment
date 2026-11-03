@@ -45,3 +45,4 @@ def test_plot_trajectory_3d_saves_file(mock_ate_result, tmp_path):
     )
     assert out_file.exists()
     assert out_file.stat().st_size > 1000
+

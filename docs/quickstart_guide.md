@@ -98,3 +98,4 @@ python scripts/filter_trajectory.py \
     --gt data/icl_nuim/living_room_traj1_loop/groundtruth.txt \
     --window 5
 ```
+

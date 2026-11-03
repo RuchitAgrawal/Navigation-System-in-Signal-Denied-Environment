@@ -63,3 +63,4 @@ def test_filter_short_trajectory():
     short = [make_pose(np.eye(3), np.zeros(3))]
     res = smooth_trajectory_poses(short, window_size=5)
     assert len(res) == 1
+

@@ -33,3 +33,4 @@ def test_evaluate_trajectory_cli_with_json_out(tmp_path):
         assert "ate_rmse_m" in data
         assert "rpe_trans_rmse_m" in data
         assert data["alignment"] == "sim3"
+

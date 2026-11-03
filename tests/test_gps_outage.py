@@ -57,3 +57,4 @@ def test_plot_gps_outage_analysis(synthetic_poses, tmp_path):
     path = plot_gps_outage_analysis(res, out_png)
     assert path.exists()
     assert path.stat().st_size > 1000
+

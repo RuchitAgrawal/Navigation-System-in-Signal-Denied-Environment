@@ -29,3 +29,4 @@ class TestMultiEnvironmentLoaders:
         assert "abandonedfactory" in ds.sequence
         assert ds.camera.width == 640
         assert ds.camera.height == 480
+

@@ -55,3 +55,4 @@ import matplotlib
 matplotlib.use("Agg")  # Non-interactive raster backend
 ```
 This guarantees headless figure rendering and direct file saving without X11 server dependencies.
+

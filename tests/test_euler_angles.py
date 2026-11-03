@@ -45,3 +45,4 @@ def test_rodrigues_zero():
     rvec_zero = np.zeros(3)
     R_ident = rodrigues_to_rotation(rvec_zero)
     np.testing.assert_allclose(R_ident, np.eye(3), atol=1e-8)
+

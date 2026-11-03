@@ -62,3 +62,4 @@ def plot_inlier_history(
         plt.show()
     plt.close(fig)
     return save_path
+

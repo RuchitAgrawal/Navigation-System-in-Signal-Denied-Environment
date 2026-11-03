@@ -79,3 +79,4 @@ def test_generate_all_ablation_charts_integration(tmp_path):
         assert "latency_throughput" in charts
         for path in charts.values():
             assert path.exists()
+

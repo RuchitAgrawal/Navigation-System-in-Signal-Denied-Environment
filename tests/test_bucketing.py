@@ -81,3 +81,4 @@ class TestDistributeGrid:
         ]
         result = distribute_grid(kps, width=640, height=480, n_buckets_x=3, n_buckets_y=2, max_features=60)
         assert len(result) == 60
+

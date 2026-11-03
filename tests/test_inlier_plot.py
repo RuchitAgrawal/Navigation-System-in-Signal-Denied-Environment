@@ -38,3 +38,4 @@ def test_plot_inlier_history_saves_file(sample_diagnostics, tmp_path):
     )
     assert result.exists()
     assert result.stat().st_size > 1000
+

@@ -62,3 +62,4 @@ class TestConstantVelocityMotionModel:
         assert mm.has_prior
         mm.reset()
         assert not mm.has_prior
+
