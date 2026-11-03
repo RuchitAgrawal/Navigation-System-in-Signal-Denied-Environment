@@ -27,3 +27,16 @@ class TestComputeScaleOverTime:
         scales = compute_scale_over_time(gt, gt, window=10)
         assert len(scales) == 40  # n - window
 
+    def test_none_gt_handled_gracefully(self):
+        gt = [None] * 5 + make_poses(25)
+        est = make_poses(30)
+        scales = compute_scale_over_time(est, gt, window=10)
+        assert len(scales) == 20
+
+    def test_stationary_poses_return_nan(self):
+        gt = [make_pose(np.eye(3), np.zeros(3)) for _ in range(20)]
+        est = [make_pose(np.eye(3), np.zeros(3)) for _ in range(20)]
+        scales = compute_scale_over_time(est, gt, window=5)
+        # All differences are 0 -> returns NaN
+        assert np.all(np.isnan(scales))
+
