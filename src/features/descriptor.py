@@ -185,11 +185,20 @@ def create_descriptor(config: dict):
         thresh = int(config.get("thresh", 30))
         octaves = int(config.get("octaves", 3))
         pattern_scale = float(config.get("pattern_scale", 1.0))
-        return cv2.BRISK_create(
-            thresh=thresh,
-            octaves=octaves,
-            patternScale=pattern_scale,
-        )
+        if hasattr(cv2, "BRISK_create"):
+            return cv2.BRISK_create(
+                thresh=thresh,
+                octaves=octaves,
+                patternScale=pattern_scale,
+            )
+        elif hasattr(cv2, "xfeatures2d") and hasattr(cv2.xfeatures2d, "BRISK_create"):
+            return cv2.xfeatures2d.BRISK_create(
+                thresh=thresh,
+                octaves=octaves,
+                patternScale=pattern_scale,
+            )
+        else:
+            raise AttributeError("Neither cv2.BRISK_create nor cv2.xfeatures2d.BRISK_create available.")
 
     else:
         raise ValueError(
