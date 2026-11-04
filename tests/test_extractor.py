@@ -100,3 +100,18 @@ class TestFeatureExtractorFASTBRIEF:
             warnings.simplefilter("ignore")
             result = self.extractor.extract(self.img)
         assert isinstance(result, ExtractionResult)
+
+
+class TestFeatureExtractorCLAHE:
+    def test_clahe_preprocessing(self):
+        cfg = build_feature_config(
+            {"name": "FAST", "threshold": 20, "max_keypoints": 200},
+            {"name": "ORB"},
+        )
+        extractor = FeatureExtractor(cfg, clahe=True, clahe_clip_limit=3.0)
+        # Create an image with high dynamic range (dark and bright halves)
+        img = np.zeros((200, 200), dtype=np.uint8)
+        img[:, 100:] = 240
+        result = extractor.extract(img)
+        assert isinstance(result, ExtractionResult)
+        assert extractor.clahe is True

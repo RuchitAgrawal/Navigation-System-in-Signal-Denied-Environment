@@ -65,11 +65,17 @@ class FeatureExtractor:
         bucketing: str = "none",
         subpixel: bool = False,
         max_features: int = 2000,
+        clahe: bool = False,
+        clahe_clip_limit: float = 2.0,
+        clahe_grid_size: Tuple[int, int] = (8, 8),
     ) -> None:
         self.config = config
         self.bucketing = bucketing.lower()
         self.subpixel = subpixel
         self.max_features = max_features
+        self.clahe = clahe
+        self.clahe_clip_limit = clahe_clip_limit
+        self.clahe_grid_size = clahe_grid_size
 
     def _apply_bucketing_and_subpixel(self, gray: np.ndarray, kps: List[cv2.KeyPoint]) -> List[cv2.KeyPoint]:
         """Apply spatial bucketing and sub-pixel refinement if configured."""
@@ -99,6 +105,13 @@ class FeatureExtractor:
         ExtractionResult
         """
         fc = self.config
+
+        if self.clahe:
+            clahe_obj = cv2.createCLAHE(
+                clipLimit=self.clahe_clip_limit,
+                tileGridSize=self.clahe_grid_size,
+            )
+            gray = clahe_obj.apply(gray)
 
         if fc.is_joint_orb and self.bucketing == "none" and not self.subpixel:
             # Fast-path for baseline ORB+ORB without extra bucketing/subpixel

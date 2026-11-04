@@ -79,6 +79,9 @@ class VOPipeline:
         bucketing: str = "none",
         subpixel: bool = False,
         max_features: int = 2000,
+        clahe: bool = False,
+        clahe_clip_limit: float = 2.0,
+        clahe_grid_size: Tuple[int, int] = (8, 8),
     ) -> None:
         self.fc = feature_config
         self.extractor = FeatureExtractor(
@@ -86,6 +89,9 @@ class VOPipeline:
             bucketing=bucketing,
             subpixel=subpixel,
             max_features=max_features,
+            clahe=clahe,
+            clahe_clip_limit=clahe_clip_limit,
+            clahe_grid_size=clahe_grid_size,
         )
         self.ransac_threshold = ransac_threshold
         self.ransac_confidence = ransac_confidence

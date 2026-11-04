@@ -96,6 +96,7 @@ def run_experiment(
     match_cfg     = exp_cfg.get("matching", {})
     bucketing_cfg = exp_cfg.get("bucketing", {})
     refine_cfg    = exp_cfg.get("refinement", {})
+    preproc_cfg   = exp_cfg.get("preprocessing", {})
 
     pipeline = VOPipeline(
         feature_config=fc,
@@ -111,6 +112,9 @@ def run_experiment(
         bucketing=str(bucketing_cfg.get("strategy", "none")),
         subpixel=bool(refine_cfg.get("subpixel", False)),
         max_features=int(bucketing_cfg.get("max_features", 2000)),
+        clahe=bool(preproc_cfg.get("clahe", False)),
+        clahe_clip_limit=float(preproc_cfg.get("clahe_clip_limit", 2.0)),
+        clahe_grid_size=tuple(preproc_cfg.get("clahe_grid_size", [8, 8])),
     )
 
     t_start = time.perf_counter()
