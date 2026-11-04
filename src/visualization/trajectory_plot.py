@@ -92,8 +92,9 @@ def plot_trajectory_2d(
     )
 
     plt.tight_layout()
-    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_path, dpi=150, bbox_inches="tight")
+    out_path = Path(save_path).resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(str(out_path), dpi=150, bbox_inches="tight")
     if show:
         plt.show()
     plt.close(fig)
@@ -121,8 +122,9 @@ def plot_ate_over_time(
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.35)
     plt.tight_layout()
-    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_path, dpi=150, bbox_inches="tight")
+    out_path = Path(save_path).resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(str(out_path), dpi=150, bbox_inches="tight")
     if show:
         plt.show()
     plt.close(fig)
@@ -209,36 +211,55 @@ def plot_benchmark_comparison(
     if df.empty:
         return
 
-    configs = df["config_id"].tolist()
-    x = np.arange(len(configs))
-    width = 0.25
+    # Create clear sequence-differentiated labels
+    labels = []
+    for _, r in df.iterrows():
+        cfg = r["config_id"]
+        seq_short = (
+            str(r.get("sequence", ""))
+            .replace("_Easy_P000", "")
+            .replace("_loop", "")
+            .replace("_room", "")
+            .replace("living", "living")
+            .replace("office", "office")
+            .replace("abandonedfactory", "factory")
+        )
+        labels.append(f"{cfg}\n({seq_short})")
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    x = np.arange(len(labels))
+
+    fig, axes = plt.subplots(1, 3, figsize=(16, 5), dpi=150)
     fig.suptitle(f"Benchmark Comparison — {dataset_name}", fontsize=13, fontweight="bold")
 
     # ATE RMSE
-    axes[0].bar(x, df["ate_rmse_m"], width=0.5, color=COLORS["error"], alpha=0.8)
-    axes[0].set_xticks(x); axes[0].set_xticklabels(configs, rotation=20, ha="right")
-    axes[0].set_ylabel("ATE RMSE (m)"); axes[0].set_title("ATE RMSE")
+    axes[0].bar(x, df["ate_rmse_m"], width=0.6, color=COLORS["error"], alpha=0.85, edgecolor="black", linewidth=0.5)
+    axes[0].set_xticks(x)
+    axes[0].set_xticklabels(labels, rotation=25, ha="right", fontsize=8)
+    axes[0].set_ylabel("ATE RMSE (m)")
+    axes[0].set_title("Trajectory Error (ATE RMSE)")
     axes[0].grid(axis="y", alpha=0.4)
 
     # Mean FPS
-    axes[1].bar(x, df["mean_fps"], width=0.5, color=COLORS["aligned"], alpha=0.8)
-    axes[1].set_xticks(x); axes[1].set_xticklabels(configs, rotation=20, ha="right")
-    axes[1].set_ylabel("Mean FPS"); axes[1].set_title("Runtime (Mean FPS)")
+    axes[1].bar(x, df["mean_fps"], width=0.6, color=COLORS["aligned"], alpha=0.85, edgecolor="black", linewidth=0.5)
+    axes[1].set_xticks(x)
+    axes[1].set_xticklabels(labels, rotation=25, ha="right", fontsize=8)
+    axes[1].set_ylabel("Mean FPS")
+    axes[1].set_title("Runtime (Mean FPS)")
     axes[1].grid(axis="y", alpha=0.4)
 
     # Tracking success %
-    axes[2].bar(x, df["tracking_success_pct"], width=0.5,
-                color=COLORS["est"], alpha=0.8)
-    axes[2].set_xticks(x); axes[2].set_xticklabels(configs, rotation=20, ha="right")
-    axes[2].set_ylabel("Success (%)"); axes[2].set_title("Tracking Success Rate")
+    axes[2].bar(x, df["tracking_success_pct"], width=0.6, color=COLORS["est"], alpha=0.85, edgecolor="black", linewidth=0.5)
+    axes[2].set_xticks(x)
+    axes[2].set_xticklabels(labels, rotation=25, ha="right", fontsize=8)
+    axes[2].set_ylabel("Success (%)")
+    axes[2].set_title("Tracking Success Rate (%)")
     axes[2].set_ylim(0, 105)
     axes[2].grid(axis="y", alpha=0.4)
 
     plt.tight_layout()
-    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_path, dpi=150, bbox_inches="tight")
+    out_path = Path(save_path).resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(str(out_path), dpi=150, bbox_inches="tight")
     if show:
         plt.show()
     plt.close(fig)
