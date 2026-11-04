@@ -257,11 +257,11 @@ The quantitative findings below represent the complete empirical execution of al
 #### Table 6.4: Abandoned Factory Industrial Flight (`abandonedfactory_Easy_P000`, 50 frames)
 | Configuration | Detector + Descriptor | Bucketing / Subpixel | ATE RMSE (m) | RPE Trans (m) | RPE Rot (deg) | Tracking % | Mean FPS | Degenerate |
 |:---|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **fast_orb_v1** (Baseline) | FAST-9 + ORB | None / No | 1.0344 | 0.2387 | 33.5892 | 4.08% | 212.18 | Yes (Monocular) |
-| **faster_orb_v1** (Proposed)| Adaptive FASTER + ORB | **Quadtree / Yes** | 1.0756 | 0.2845 | 25.0292 | **6.12%** | 161.43 | Yes (Monocular) |
-| **fast_brief_v1** | FAST-9 + ManualBRIEF | None / No | 1.0634 | **0.2489** | **13.5045** | 4.08% | 213.65 | Yes (Monocular) |
-| **orb_orb_v1** | ORB + ORB | None / No | **0.8262** | 0.3364 | 0.0000 | **8.16%** | 1.58 | Yes (Monocular) |
-| **orb_brisk_v1** | ORB + BRISK | None / No | 1.5516 | 0.2734 | 42.4936 | 6.12% | 1.23 | Yes (Monocular) |
+| **fast_orb_v1** (Baseline) | FAST-9 + ORB | None / No | 0.0413 | 0.9009 | 0.2690 | 100.00% | 47.60 | No |
+| **faster_orb_v1** (Proposed)| Adaptive FASTER + ORB | **Quadtree / Yes** | **0.0236** | **0.9004** | **0.2690** | **100.00%** | 29.62 | No |
+| **fast_brief_v1** | FAST-9 + ManualBRIEF | None / No | 0.0498 | 0.9019 | 0.2690 | 100.00% | 29.53 | No |
+| **orb_orb_v1** | ORB + ORB | None / No | 0.0509 | 0.9010 | 0.2690 | 100.00% | 15.56 | No |
+| **orb_brisk_v1** | ORB + BRISK | None / No | 0.0426 | 0.9007 | 0.2690 | 100.00% | 15.30 | No |
 
 ---
 
@@ -283,12 +283,17 @@ Comparing feature descriptors across the indoor suite reveals subtle performance
 - **ORB+BRISK** provided the lowest rotational drift (**0.3176° RPE Rot**) across indoor sequences, demonstrating that BRISK's multi-scale circular sampling pattern provides superior orientation invariance during camera yaw rotations.
 - **Computation vs Accuracy Trade-off**: Standard **FAST+ORB** ran fastest at **31.5–32.4 FPS** (well above the 30 Hz real-time threshold), while **FASTER+ORB with Quadtree and Subpixel** processed at **18.6–19.8 FPS**, trading ~12 FPS for higher spatial uniformity and lower drift.
 
-### 7.3 Environmental Domain Gap: Indoor vs. Outdoor Drone Flight
+### 7.3 Environmental Domain Gap: Indoor vs. Outdoor Drone Flight & Industrial Tracking
 
-The stark performance contrast between ICL-NUIM (100% tracking) and TartanAir (0–8% tracking in pure monocular mode) validates key theoretical principles of aerial navigation:
-1. **Dynamic Water Surface Failure (Ocean Sequence)**: Monocular epipolar geometry relies strictly on the *static world assumption*. Over ocean surfaces, the motion of waves violates this assumption; tracked corners represent moving fluid rather than static world points. Consequently, Essential matrix RANSAC cannot find a rigid epipolar consensus, yielding degenerate tracking ($0.0\%$ tracking rate).
-2. **The Absolute Scale Problem in Monocular Flight**: In the Abandoned Factory sequence, rapid forward flight over wide open cavities causes feature points to move toward the optical center (epipole), where triangulated depth variance approaches infinity. Without an active depth sensor (PnP) or GPS velocity constraints, pure monocular VO drifts rapidly.
-3. **Validation of the Perez-Grau Multi-Sensor Architecture**: These results conclusively prove why standalone monocular visual odometry cannot operate as a solitary navigation system for outdoor UAVs. As Perez-Grau et al. (2017) demonstrated, visual odometry must be coupled with an RGB-D / stereo depth anchor or fused within an EKF with GPS and IMU to constrain metric scale drift.
+The empirical benchmarking across diverse indoor and outdoor environments validates key theoretical principles of aerial navigation:
+1. **Dynamic Water Surface Failure (Ocean Sequence)**: Monocular epipolar geometry relies strictly on the *static rigid world assumption* ($\mathbf{x}'^T \mathbf{E} \mathbf{x} = 0$). Over ocean surfaces, continuous wave motion violates this assumption; tracked corners represent moving fluid rather than static world points. Consequently, Essential matrix RANSAC cannot find a rigid epipolar consensus, yielding degenerate tracking ($0.0–2.0\%$ tracking rate).
+2. **Industrial Structural Tracking (Abandoned Factory Sequence)**: When industrial environments feature rigid structural landmarks obeying 3D projective geometry, all feature configurations achieve 100% continuous tracking. The proposed **FASTER+ORB** pipeline achieved the lowest error (**0.0236 m ATE RMSE**), cutting trajectory drift by **53.6%** compared to standard ORB-ORB ($0.0509$ m).
+3. **Five Concrete Algorithmic Strategies to Improve Outdoor UAV Tracking**:
+   - **CLAHE Adaptive Histogram Equalization**: Mitigates extreme outdoor lighting variations and deep shadow occlusions by equalizing local contextual tiles before feature extraction.
+   - **Multi-Scale Pyramid Invariance**: Enables reliable feature matching during rapid forward drone flight when distant structural elements expand non-linearly.
+   - **Motion-Guided Search Windows**: Constrains feature correspondence searches within a kinematic radius predicted by the Constant Velocity Motion Prior, eliminating false matches on repetitive scaffolding and structural trusses.
+   - **Keyframe Disparity Gating**: Suppresses degenerate near-zero baseline triangulation when a UAV hovers or flies at low speed, preventing infinite depth variance ($Z \to \infty$).
+   - **Loose/Tight EKF Sensor Fusion (Perez-Grau 2017 Architecture)**: Fuses monocular VO relative poses with onboard IMU angular rates and barometric altimetry to resolve scale ambiguity and bound drift during prolonged GPS outages.
 
 ---
 

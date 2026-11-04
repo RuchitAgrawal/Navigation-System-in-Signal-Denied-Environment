@@ -1,4 +1,4 @@
-﻿# Benchmark: run all valid configurations
+# Benchmark: run all valid configurations
 # Iterates over all experiment configs on a given dataset
 
 experiment_id: benchmark_all_v1
@@ -9,10 +9,13 @@ configs:
   - configs/experiments/fast_orb.yaml
   - configs/experiments/fast_brief.yaml
   - configs/experiments/orb_brisk.yaml
+  - configs/experiments/faster_orb.yaml   # Proposed enhancement
 
 datasets:
   - configs/datasets/icl_nuim.yaml
+  - configs/datasets/icl_nuim_office.yaml
   - configs/datasets/tartanair.yaml
+  - configs/datasets/tartanair_abandonedfactory.yaml
 
 output:
   root: results/
