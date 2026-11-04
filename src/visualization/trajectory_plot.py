@@ -204,62 +204,75 @@ def plot_benchmark_comparison(
     save_path: str | Path,
     show: bool = False,
 ) -> None:
-    """Bar chart comparing ATE RMSE, FPS, and tracking success across configs."""
+    """Grouped bar chart comparing ATE RMSE, FPS, and tracking success across configs with zero label overlap."""
     import pandas as pd
     df = pd.DataFrame(summary_rows)
     df = df[df["dataset"] == dataset_name].reset_index(drop=True)
     if df.empty:
         return
 
-    # Create clear sequence-differentiated labels
-    labels = []
-    for _, r in df.iterrows():
-        cfg = r["config_id"]
-        seq_short = (
-            str(r.get("sequence", ""))
-            .replace("_Easy_P000", "")
-            .replace("_loop", "")
-            .replace("_room", "")
-            .replace("living", "living")
-            .replace("office", "office")
-            .replace("abandonedfactory", "factory")
-        )
-        labels.append(f"{cfg}\n({seq_short})")
+    configs = list(df["config_id"].unique())
+    sequences = list(df["sequence"].unique())
+    n_configs = len(configs)
+    n_seq = len(sequences)
 
-    x = np.arange(len(labels))
+    x = np.arange(n_configs)
+    bar_width = 0.7 / max(n_seq, 1)
 
-    fig, axes = plt.subplots(1, 3, figsize=(16, 5), dpi=150)
-    fig.suptitle(f"Benchmark Comparison — {dataset_name}", fontsize=13, fontweight="bold")
+    seq_colors = ["#2b5c8f", "#e06666", "#2ca02c", "#ff7f0e"]
 
-    # ATE RMSE
-    axes[0].bar(x, df["ate_rmse_m"], width=0.6, color=COLORS["error"], alpha=0.85, edgecolor="black", linewidth=0.5)
-    axes[0].set_xticks(x)
-    axes[0].set_xticklabels(labels, rotation=25, ha="right", fontsize=8)
-    axes[0].set_ylabel("ATE RMSE (m)")
-    axes[0].set_title("Trajectory Error (ATE RMSE)")
-    axes[0].grid(axis="y", alpha=0.4)
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5.5), dpi=200)
+    fig.suptitle(f"Benchmark Multi-Sequence Comparison — {dataset_name.upper()}", fontsize=14, fontweight="bold", y=0.98)
 
-    # Mean FPS
-    axes[1].bar(x, df["mean_fps"], width=0.6, color=COLORS["aligned"], alpha=0.85, edgecolor="black", linewidth=0.5)
-    axes[1].set_xticks(x)
-    axes[1].set_xticklabels(labels, rotation=25, ha="right", fontsize=8)
-    axes[1].set_ylabel("Mean FPS")
-    axes[1].set_title("Runtime (Mean FPS)")
-    axes[1].grid(axis="y", alpha=0.4)
+    metrics = [
+        ("ate_rmse_m", "ATE RMSE (m)", "Trajectory Error (ATE RMSE)", axes[0], None),
+        ("mean_fps", "Mean FPS", "Processing Speed (FPS)", axes[1], None),
+        ("tracking_success_pct", "Success Rate (%)", "Tracking Robustness (%)", axes[2], (0, 105)),
+    ]
 
-    # Tracking success %
-    axes[2].bar(x, df["tracking_success_pct"], width=0.6, color=COLORS["est"], alpha=0.85, edgecolor="black", linewidth=0.5)
-    axes[2].set_xticks(x)
-    axes[2].set_xticklabels(labels, rotation=25, ha="right", fontsize=8)
-    axes[2].set_ylabel("Success (%)")
-    axes[2].set_title("Tracking Success Rate (%)")
-    axes[2].set_ylim(0, 105)
-    axes[2].grid(axis="y", alpha=0.4)
+    for col_name, ylabel, title, ax, ylim in metrics:
+        for s_idx, seq in enumerate(sequences):
+            seq_df = df[df["sequence"] == seq]
+            vals = []
+            for cfg in configs:
+                match = seq_df[seq_df["config_id"] == cfg]
+                if not match.empty and not pd.isna(match[col_name].values[0]):
+                    vals.append(float(match[col_name].values[0]))
+                else:
+                    vals.append(0.0)
+
+            offset = (s_idx - n_seq / 2 + 0.5) * bar_width
+            seq_label = (
+                seq.replace("_Easy_P000", "")
+                .replace("_traj1_loop", " (Living)")
+                .replace("_traj0_loop", " (Office)")
+                .replace("ocean", "Ocean")
+                .replace("abandonedfactory", "Factory")
+            )
+            ax.bar(
+                x + offset,
+                vals,
+                width=bar_width,
+                label=seq_label,
+                color=seq_colors[s_idx % len(seq_colors)],
+                edgecolor="black",
+                linewidth=0.6,
+                alpha=0.9,
+            )
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(configs, rotation=15, ha="right", fontsize=9, fontweight="medium")
+        ax.set_ylabel(ylabel, fontsize=10)
+        ax.set_title(title, fontsize=11, fontweight="bold", pad=8)
+        ax.grid(axis="y", linestyle="--", alpha=0.5)
+        if ylim:
+            ax.set_ylim(ylim)
+        ax.legend(title="Sequence", fontsize=8, title_fontsize=8, loc="upper right")
 
     plt.tight_layout()
     out_path = Path(save_path).resolve()
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(str(out_path), dpi=150, bbox_inches="tight")
+    plt.savefig(str(out_path), dpi=200, bbox_inches="tight")
     if show:
         plt.show()
     plt.close(fig)
