@@ -2,13 +2,22 @@
 download_datasets.py — Automated downloader and benchmark sequence generator.
 
 Supports:
-1. Automated download of official ICL-NUIM sequences.
+1. Automated download of official ICL-NUIM sequences (with retry + progress bar).
 2. TartanAir automated downloader instructions / tools interface.
 3. Offline benchmark sequence generator for testing the 2+2 suite immediately.
+4. --manual-steps flag: prints step-by-step browser download instructions.
+
+Usage
+-----
+  python scripts/download_datasets.py --sequence living_room_traj1_loop
+  python scripts/download_datasets.py --manual-steps
+  python scripts/download_datasets.py --generate-offline
 """
 
 from pathlib import Path
 import argparse
+import shutil
+import time
 import urllib.request
 import tarfile
 import sys
@@ -26,27 +35,134 @@ ICL_NUIM_URLS = {
     "office_room_traj0_loop": "https://www.doc.ic.ac.uk/~ahanda/office_room_traj0_loop.tar.gz",
 }
 
+ICL_NUIM_GT_URLS = {
+    "living_room_traj1_loop": (
+        "https://www.doc.ic.ac.uk/~ahanda/VaFRIC/livingRoom1.gt.freiburg",
+        "livingRoom1.gt.freiburg",
+    ),
+    "office_room_traj0_loop": (
+        "https://www.doc.ic.ac.uk/~ahanda/VaFRIC/office0.gt.freiburg",
+        "office0.gt.freiburg",
+    ),
+}
 
-def download_icl_nuim_sequence(sequence_name: str, target_dir: Path) -> bool:
-    """Download and extract an ICL-NUIM sequence."""
+MANUAL_STEPS = """
+══════════════════════════════════════════════════════════
+  ICL-NUIM Manual Download Instructions
+══════════════════════════════════════════════════════════
+
+The automated download requires access to Imperial College
+London's server. If it fails, follow these steps:
+
+Step 1 — Open this page in your browser:
+  https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html
+
+Step 2 — Download these two files:
+  • living_room_traj1_loop.tar.gz     (~700 MB)
+  • livingRoom1.gt.freiburg           (ground truth, ~few KB)
+
+  Both links are under "RGB-D Dataset" on that page.
+
+Step 3 — Place the files here:
+  d:\\projects\\minor-project\\data\\icl_nuim\\
+
+  So the layout is:
+    data/icl_nuim/living_room_traj1_loop.tar.gz
+    data/icl_nuim/livingRoom1.gt.freiburg
+
+Step 4 — Tell the agent to continue. It will extract the
+  archive and run the benchmark automatically.
+
+══════════════════════════════════════════════════════════
+"""
+
+
+def _progress_hook(block_count: int, block_size: int, total_size: int) -> None:
+    """Display a simple download progress bar."""
+    if total_size <= 0:
+        print(f"\r  Downloaded {block_count * block_size // 1024 // 1024} MB...", end="", flush=True)
+        return
+    downloaded = block_count * block_size
+    pct = min(100, int(downloaded * 100 / total_size))
+    mb_done = downloaded / 1024 / 1024
+    mb_total = total_size / 1024 / 1024
+    bar = "█" * (pct // 5) + "░" * (20 - pct // 5)
+    print(f"\r  [{bar}] {pct:3d}%  {mb_done:.1f}/{mb_total:.1f} MB", end="", flush=True)
+
+
+def download_icl_nuim_sequence(
+    sequence_name: str,
+    target_dir: Path,
+    max_retries: int = 3,
+    retry_delay_s: float = 5.0,
+) -> bool:
+    """Download and extract an ICL-NUIM sequence with retry and progress display.
+
+    Parameters
+    ----------
+    sequence_name : one of the keys in ICL_NUIM_URLS
+    target_dir    : destination directory (created if absent)
+    max_retries   : number of download attempts before giving up
+    retry_delay_s : seconds to wait between retries
+
+    Returns
+    -------
+    True on success, False on failure (prints manual instructions on failure).
+    """
     if sequence_name not in ICL_NUIM_URLS:
-        print(f"Unknown sequence {sequence_name}. Available: {list(ICL_NUIM_URLS.keys())}")
+        print(f"[ERROR] Unknown sequence '{sequence_name}'.")
+        print(f"        Available: {list(ICL_NUIM_URLS.keys())}")
         return False
 
     url = ICL_NUIM_URLS[sequence_name]
+    gt_url, gt_filename = ICL_NUIM_GT_URLS[sequence_name]
+    target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     tar_path = target_dir / f"{sequence_name}.tar.gz"
+    gt_path = target_dir / gt_filename
 
-    print(f"Downloading {sequence_name} from {url}...")
+    # ── Download main archive ────────────────────────────────────────────────
+    for attempt in range(1, max_retries + 1):
+        print(f"\n[{attempt}/{max_retries}] Downloading {sequence_name}")
+        print(f"  URL : {url}")
+        print(f"  Dest: {tar_path}")
+        try:
+            urllib.request.urlretrieve(url, str(tar_path), reporthook=_progress_hook)
+            print()  # newline after progress bar
+            break
+        except Exception as exc:
+            print(f"\n  [WARN] Attempt {attempt} failed: {exc}")
+            if tar_path.exists():
+                tar_path.unlink()
+            if attempt < max_retries:
+                print(f"  Retrying in {retry_delay_s}s...")
+                time.sleep(retry_delay_s)
+            else:
+                print("\n[ERROR] All download attempts failed.")
+                print(MANUAL_STEPS)
+                return False
+
+    # ── Download ground-truth file ───────────────────────────────────────────
+    if not gt_path.exists():
+        print(f"\nDownloading ground truth: {gt_filename}")
+        try:
+            urllib.request.urlretrieve(gt_url, str(gt_path), reporthook=_progress_hook)
+            print()
+        except Exception as exc:
+            print(f"\n  [WARN] Ground truth download failed: {exc}")
+            print(f"  You can download it manually from:\n  {gt_url}")
+
+    # ── Extract archive ──────────────────────────────────────────────────────
+    print(f"\nExtracting {tar_path.name}  ({tar_path.stat().st_size / 1024 / 1024:.1f} MB)...")
     try:
-        urllib.request.urlretrieve(url, str(tar_path))
-        print(f"Extracting {tar_path}...")
         with tarfile.open(tar_path, "r:gz") as tar:
             tar.extractall(path=target_dir)
-        print(f"[SUCCESS] Downloaded and extracted {sequence_name} to {target_dir}")
+        # Remove archive to save space
+        tar_path.unlink()
+        print(f"[SUCCESS] {sequence_name} extracted to {target_dir}")
         return True
-    except Exception as e:
-        print(f"[ERROR] Could not download {sequence_name}: {e}")
+    except Exception as exc:
+        print(f"[ERROR] Extraction failed: {exc}")
         return False
 
 
