@@ -283,17 +283,54 @@ def generate_benchmark_suite_offline():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download or generate benchmark datasets.")
-    parser.add_argument("--sequence", choices=list(ICL_NUIM_URLS.keys()), help="Download specific ICL-NUIM sequence.")
-    parser.add_argument("--offline-suite", action="store_true", help="Generate full 2+2 suite locally for fast testing.")
+    parser = argparse.ArgumentParser(
+        description="Download or generate benchmark datasets for the VO project.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Download ICL-NUIM living room sequence (real data, ~700 MB):
+  python scripts/download_datasets.py --sequence living_room_traj1_loop
+
+  # Print manual browser download steps (use if automated download fails):
+  python scripts/download_datasets.py --manual-steps
+
+  # Generate offline 2+2 synthetic benchmark suite (no internet needed):
+  python scripts/download_datasets.py --offline-suite
+        """,
+    )
+    parser.add_argument(
+        "--sequence",
+        choices=list(ICL_NUIM_URLS.keys()),
+        help="ICL-NUIM sequence to download (automated, with retry and progress bar).",
+    )
+    parser.add_argument(
+        "--manual-steps",
+        action="store_true",
+        help="Print step-by-step browser download instructions for ICL-NUIM.",
+    )
+    parser.add_argument(
+        "--offline-suite",
+        action="store_true",
+        help="Generate the full 2+2 synthetic benchmark suite locally (no download needed).",
+    )
+    parser.add_argument(
+        "--data-root",
+        default="data",
+        help="Root directory for downloaded datasets (default: data/).",
+    )
     args = parser.parse_args()
 
-    if args.offline_suite:
+    if args.manual_steps:
+        print(MANUAL_STEPS)
+    elif args.offline_suite:
         generate_benchmark_suite_offline()
     elif args.sequence:
-        download_icl_nuim_sequence(args.sequence, Path("data/icl_nuim"))
+        dest = Path(args.data_root) / "icl_nuim"
+        success = download_icl_nuim_sequence(args.sequence, dest)
+        if not success:
+            print("\nTip: Run with --manual-steps to see browser download instructions.")
     else:
-        print("Usage: python scripts/download_datasets.py --offline-suite (or --sequence living_room_traj1_loop)")
+        parser.print_help()
 
 
 if __name__ == "__main__":
