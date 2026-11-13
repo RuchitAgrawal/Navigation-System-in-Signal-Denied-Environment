@@ -31,8 +31,11 @@ from src.geometry.transforms import _R_CAM_NED
 
 
 ICL_NUIM_URLS = {
-    "living_room_traj1_loop": "https://www.doc.ic.ac.uk/~ahanda/living_room_traj1_loop.tar.gz",
-    "office_room_traj0_loop": "https://www.doc.ic.ac.uk/~ahanda/office_room_traj0_loop.tar.gz",
+    # Note: extension is .tgz (not .tar.gz) — both formats are identical gzip-compressed tar archives
+    "living_room_traj1_loop": "http://www.doc.ic.ac.uk/~ahanda/living_room_traj1_loop.tgz",
+    "living_room_traj0_loop": "http://www.doc.ic.ac.uk/~ahanda/living_room_traj0_loop.tgz",
+    "office_room_traj0_loop": "http://www.doc.ic.ac.uk/~ahanda/office_room_traj0_loop.tgz",
+    "office_room_traj3_loop": "http://www.doc.ic.ac.uk/~ahanda/office_room_traj3_loop.tgz",
 }
 
 ICL_NUIM_GT_URLS = {
@@ -40,9 +43,17 @@ ICL_NUIM_GT_URLS = {
         "https://www.doc.ic.ac.uk/~ahanda/VaFRIC/livingRoom1.gt.freiburg",
         "livingRoom1.gt.freiburg",
     ),
+    "living_room_traj0_loop": (
+        "https://www.doc.ic.ac.uk/~ahanda/VaFRIC/livingRoom0.gt.freiburg",
+        "livingRoom0.gt.freiburg",
+    ),
     "office_room_traj0_loop": (
         "https://www.doc.ic.ac.uk/~ahanda/VaFRIC/office0.gt.freiburg",
         "office0.gt.freiburg",
+    ),
+    "office_room_traj3_loop": (
+        "https://www.doc.ic.ac.uk/~ahanda/VaFRIC/office3.gt.freiburg",
+        "office3.gt.freiburg",
     ),
 }
 
