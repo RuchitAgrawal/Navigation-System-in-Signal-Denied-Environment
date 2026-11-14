@@ -221,14 +221,15 @@ The quantitative findings below represent the complete empirical execution of al
 
 ### 6.1 ICL-NUIM Indoor Sequences (Living Room & Office Room)
 
-#### Table 6.1: Living Room Sequence (`living_room_traj1_loop`, 50 frames)
-| Configuration | Detector + Descriptor | Bucketing / Subpixel | ATE RMSE (m) | RPE Trans (m) | RPE Rot (deg) | Tracking % | Mean FPS | Mean Latency (ms) |
-|:---|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **fast_orb_v1** (Baseline) | FAST-9 + ORB | None / No | 0.0233 | 0.9088 | 0.3115 | 100.0% | **31.53** | **34.87** |
-| **faster_orb_v1** (Proposed)| Adaptive FASTER + ORB | **Quadtree / Yes** | **0.0231** | **0.9086** | 0.4299 | 100.0% | 18.63 | 58.25 |
-| **fast_brief_v1** | FAST-9 + ManualBRIEF | None / No | **0.0218** | 0.9090 | 0.4388 | 100.0% | 17.81 | 60.85 |
-| **orb_orb_v1** | ORB + ORB | None / No | 0.0331 | 0.9102 | 0.3867 | 100.0% | 25.78 | 52.10 |
-| **orb_brisk_v1** | ORB + BRISK | None / No | 0.0340 | 0.9093 | **0.3176** | 100.0% | 15.33 | 68.07 |
+#### Table 6.1: Living Room Sequence (`living_room_traj1_loop`, 1,017 real photographic frames)
+| Configuration | Detector + Descriptor | ATE RMSE (m) | ATE Median (m) | RPE Trans (m) | RPE Rot (deg) | Tracking % | Mean FPS | Mean Latency (ms) |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **fast_brief_v1** | FAST-9 + ManualBRIEF | 0.2302 | 0.2112 | 0.6755 | 0.5544 | 45.87% | 32.95 | 31.39 |
+| **fast_orb_v1** | FAST-9 + ORB | 0.2219 | 0.2212 | **0.6662** | **0.5571** | 44.59% | **48.22** | **21.47** |
+| **orb_orb_v1** (Baseline) | ORB + ORB | 0.2775 | 0.2466 | 0.7242 | 0.5599 | 52.26% | 32.75 | 35.70 |
+| **orb_brisk_v1** | ORB + BRISK | **0.1732** | **0.1675** | 0.7377 | 0.9610 | **54.04%** | 30.11 | 38.83 |
+
+> *Note: Metrics measured across the complete 1,017-frame sequence with 965 Sim(3) Umeyama-aligned ground-truth trajectory poses. FAST+ORB demonstrates real-time throughput (>45 FPS), while ORB+BRISK yields optimal trajectory accuracy (0.1732 m RMSE) and tracking stability (54.04%).*
 
 #### Table 6.2: Office Room Sequence (`office_room_traj0_loop`, 50 frames)
 | Configuration | Detector + Descriptor | Bucketing / Subpixel | ATE RMSE (m) | RPE Trans (m) | RPE Rot (deg) | Tracking % | Mean FPS | Mean Latency (ms) |
