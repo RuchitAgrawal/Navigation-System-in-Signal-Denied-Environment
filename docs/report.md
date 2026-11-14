@@ -229,6 +229,14 @@ The quantitative findings below represent the complete empirical execution of al
 | **orb_orb_v1** (Baseline) | ORB + ORB | 0.2775 | 0.2466 | 0.7242 | 0.5599 | 52.26% | 32.75 | 35.70 |
 | **orb_brisk_v1** | ORB + BRISK | **0.1732** | **0.1675** | 0.7377 | 0.9610 | **54.04%** | 30.11 | 38.83 |
 
+#### Table 6.1b: Frame Latency Distribution & Outlier Profiling (1,017 frames)
+| Configuration | Mean Latency (ms) | Median Latency (ms) | P95 Latency (ms) | Mean FPS | Median FPS | Real-Time Headroom |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **fast_orb_v1** | **21.47** | **20.96** | **28.71** | **48.22** | **47.71** | +60.7% over 30 Hz |
+| **fast_brief_v1** | 31.39 | 29.69 | 42.11 | 32.95 | 33.68 | +9.8% over 30 Hz |
+| **orb_orb_v1** | 35.70 | 28.18 | 63.00 | 32.75 | 35.49 | Meets 30 Hz (median) |
+| **orb_brisk_v1** | 38.83 | 30.57 | 66.52 | 30.11 | 32.71 | Meets 30 Hz (median) |
+
 > *Note: Metrics measured across the complete 1,017-frame sequence with 965 Sim(3) Umeyama-aligned ground-truth trajectory poses. FAST+ORB demonstrates real-time throughput (>45 FPS), while ORB+BRISK yields optimal trajectory accuracy (0.1732 m RMSE) and tracking stability (54.04%).*
 
 #### Table 6.2: Office Room Sequence (`office_room_traj0_loop`, 50 frames)
