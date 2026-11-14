@@ -277,12 +277,16 @@ The proposed **FASTER+ORB** configuration with **Recursive Quadtree Bucketing an
 2. **Sub-pixel Floating Point Precision**: Standard pixel-coordinate FAST detectors quantize corner positions to the nearest integer pixel. Over a 50-frame loop, this quantization error accumulates into angular orientation noise. Refinement via `cornerSubPix` reduced rotational error down to 0.4299°, providing smooth trajectory curvature.
 3. **Adaptive Threshold Stability**: While fixed FAST-9 is sensitive to contrast changes, Adaptive FASTER maintained a consistent quota of 500 feature points per frame, preventing starvation during low-contrast frames.
 
-### 7.2 Descriptor Invariance & Rotational Robustness
+### 7.2 Descriptor Invariance & Rotational Robustness across 1,017 Frames
 
-Comparing feature descriptors across the indoor suite reveals subtle performance trade-offs:
-- **FAST+BRIEF** yielded surprisingly low translation error (**0.0218 m ATE RMSE**) on forward-moving trajectories where in-plane rotation was minimal ($\Delta \theta < 5^\circ$). However, because BRIEF lacks rotation invariance, its rotational error was elevated (0.4388° RPE Rot).
-- **ORB+BRISK** provided the lowest rotational drift (**0.3176° RPE Rot**) across indoor sequences, demonstrating that BRISK's multi-scale circular sampling pattern provides superior orientation invariance during camera yaw rotations.
-- **Computation vs Accuracy Trade-off**: Standard **FAST+ORB** ran fastest at **31.5–32.4 FPS** (well above the 30 Hz real-time threshold), while **FASTER+ORB with Quadtree and Subpixel** processed at **18.6–19.8 FPS**, trading ~12 FPS for higher spatial uniformity and lower drift.
+Systematic evaluation across the complete 1,017-frame real photographic sequence (`living_room_traj1_loop`) provides empirical answers to our core research question:
+
+1. **BRISK Multi-Scale Superiority**: **ORB+BRISK** yielded the lowest overall trajectory error (**0.1732 m ATE RMSE**, median 0.1675 m) and the highest tracking success rate (**54.04%**), representing a **37.6% error reduction** compared to standard ORB-ORB (0.2775 m). BRISK's concentric circular pattern and multi-octave scale space preserve descriptor distinctiveness across substantial camera perspective shifts and scale variation.
+2. **FAST+ORB Real-Time Throughput**: Standard **FAST+ORB** achieved the fastest inference rate at **48.22 FPS** (mean frame latency **21.47 ms**, median 20.96 ms), easily outperforming real-time requirements (30 Hz) with substantial headroom for downstream state estimation. Its trajectory accuracy (**0.2219 m ATE RMSE**) was comparable to BRIEF while maintaining higher computational efficiency.
+3. **BRIEF Rotation Sensitivity**: **FAST+BRIEF** achieved **32.95 FPS** and **0.2302 m ATE RMSE**. However, as confirmed by our genuine Gaussian-sampled implementation (`ManualBRIEF-Gaussian-256`), BRIEF is not rotation-invariant ($SO(2)$ unaligned). During rapid camera turns in the living room sequence, descriptor matching degraded, resulting in dropped frames (45.87% tracking success). This provides clear experimental evidence that unoriented binary descriptors are vulnerable to rotational flight maneuvers unless paired with an orientation estimator.
+4. **Computational Throughput vs. Geometric Precision**:
+   - FAST-based detection reduces latency by **30–45%** compared to multi-level ORB pyramid detection.
+   - When maximum trajectory fidelity is required, ORB+BRISK is optimal. When minimal latency and low compute budget dominate (e.g., embedded UAV microcontrollers), FAST+ORB represents the superior Pareto-optimal configuration.
 
 ### 7.3 Environmental Domain Gap: Indoor vs. Outdoor Drone Flight & Industrial Tracking
 
