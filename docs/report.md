@@ -237,7 +237,9 @@ The quantitative findings below represent the complete empirical execution of al
 | **orb_orb_v1** | 35.70 | 28.18 | 63.00 | 32.75 | 35.49 | Meets 30 Hz (median) |
 | **orb_brisk_v1** | 38.83 | 30.57 | 66.52 | 30.11 | 32.71 | Meets 30 Hz (median) |
 
-> *Note: Metrics measured across the complete 1,017-frame sequence with 965 Sim(3) Umeyama-aligned ground-truth trajectory poses. FAST+ORB demonstrates real-time throughput (>45 FPS), while ORB+BRISK yields optimal trajectory accuracy (0.1732 m RMSE) and tracking stability (54.04%).*
+![ICL-NUIM Benchmark Comparative Trajectories and Latencies](../results/figures/benchmark_icl_nuim.png)
+
+> *Figure 6.1: Comparative performance across evaluated visual odometry configurations on ICL-NUIM Living Room (1,017 frames). Metrics measured across the complete sequence with 965 Sim(3) Umeyama-aligned ground-truth trajectory poses. FAST+ORB demonstrates real-time throughput (>45 FPS), while ORB+BRISK yields optimal trajectory accuracy (0.1732 m RMSE) and tracking stability (54.04%).*
 
 #### Table 6.2: Office Room Sequence (`office_room_traj0_loop`, 50 frames)
 | Configuration | Detector + Descriptor | Bucketing / Subpixel | ATE RMSE (m) | RPE Trans (m) | RPE Rot (deg) | Tracking % | Mean FPS | Mean Latency (ms) |
