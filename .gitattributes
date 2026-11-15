@@ -1,0 +1,21 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Source code and config files normalized to LF
+*.py text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.txt text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.ps1 text eol=lf
+
+# Binary media and archives
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.mp4 binary
+*.gz binary
+*.tgz binary
+*.zip binary
