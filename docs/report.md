@@ -347,11 +347,19 @@ The measured drift rate of **2.28% of distance traveled** demonstrates that the 
 
 ## 9. System Limitations & Operational Scope
 
-While the proposed improvements substantially outperform the baseline, several fundamental constraints remain:
-1. **Monocular Scale Observability**: In pure monocular mode (without depth or IMU), the metric scale cannot be observed from optical flow alone. An external anchor (GPS fix before outage, stereo baseline, or barometer/altimeter) is required to establish absolute scale.
-2. **Frame-to-Frame Accumulation**: Without sliding-window bundle adjustment or local pose-graph optimization, residual frame-to-frame drift inevitably accumulates monotonically over kilometers of flight.
+While the proposed improvements substantially outperform the baseline, several fundamental theoretical and operational constraints remain:
+
+1. **Monocular Scale Observability & Gauge Freedom**:
+   In calibrated monocular visual odometry, the epipolar constraint is strictly scale-invariant. For any arbitrary scalar factor $\alpha > 0$:
+   $$[\alpha \mathbf{t}]_\times = \alpha [\mathbf{t}]_\times \implies \mathbf{x}'^T [\alpha \mathbf{t}]_\times \mathbf{R} \mathbf{x} = \alpha (\mathbf{x}'^T [\mathbf{t}]_\times \mathbf{R} \mathbf{x}) = 0$$
+   Consequently, SVD decomposition of the Essential matrix $\mathbf{E} = [\mathbf{t}]_\times \mathbf{R}$ recovers only a unit direction vector $\|\mathbf{t}\|_2 = 1$, leaving translation magnitude unobservable. Absolute metric scale requires:
+   - Prior metric velocity estimation anchored before satellite loss (as demonstrated in our GPS outage experiment),
+   - Baseline triangulation via stereo or RGB-D sensors within valid range ($Z < 4.0\text{ m}$), or
+   - Inertial/altimetric fusion via an Extended Kalman Filter (EKF).
+   In benchmark evaluation, global metric alignment is established via closed-form Sim(3) similarity transformation (Umeyama, 1991), solving for optimal scale $s^*$, rotation $\mathbf{R}^*$, and translation $\mathbf{t}^*$.
+2. **Frame-to-Frame Accumulation & Drift**: Without sliding-window bundle adjustment or local pose-graph optimization, residual frame-to-frame drift inevitably accumulates monotonically over kilometers of flight.
 3. **Dynamic Fluids & Extreme Visual Aliasing**: As demonstrated in the TartanAir Ocean sequence, environments dominated by non-rigid surfaces (water waves, blowing dust) violate the rigid epipolar constraint.
-4. **Computational Headroom on Embedded Microcontrollers**: While FAST+ORB easily achieves >30 FPS, full Quadtree partitioning and sub-pixel refinement increase latency to ~54 ms on single-threaded CPUs. On flight hardware, multi-threaded C++/CUDA acceleration would be recommended.
+4. **Computational Headroom on Embedded Microcontrollers**: While FAST+ORB easily achieves >45 FPS, full Quadtree partitioning and sub-pixel refinement increase latency to ~54 ms on single-threaded CPUs. On flight hardware, multi-threaded C++/CUDA acceleration would be recommended.
 
 ---
 
