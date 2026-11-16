@@ -1,6 +1,11 @@
 # Navigation System in Signal-Denied Environments
 ## Visual Odometry Module
 
+[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/)
+[![Tests Passing](https://img.shields.io/badge/tests-170%20passing-brightgreen.svg)](tests/)
+[![Dataset](https://img.shields.io/badge/dataset-ICL--NUIM%20(1017%20frames)-orange.svg)](https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **Full Title:** A Computer Vision-Assisted GPS Navigation System for Robust Positioning in Signal-Denied Environments
 
 ---
@@ -39,7 +44,18 @@ Building upon the Perez-Grau (2017) baseline (which utilized standard FAST-9 + O
 
 ---
 
-## 2+2 Multi-Environment Benchmark Suite
+## Empirical Benchmark Results (1,017 Photographic Frames)
+
+Empirical evaluation on the full photorealistic ICL-NUIM Living Room sequence (`living_room_traj1_loop`, 1,017 frames, 965 ground-truth poses aligned with Sim(3) Umeyama transformation):
+
+| Configuration | Detector + Descriptor | ATE RMSE (m) | RPE Trans (m) | Mean FPS | Tracking Rate | Latency (ms) |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|
+| **fast_orb_v1** | FAST-9 + ORB | 0.2219 | **0.6662** | **48.22** | 44.59% | **21.47** |
+| **orb_brisk_v1** | ORB + BRISK | **0.1732** | 0.7377 | 30.11 | **54.04%** | 38.83 |
+| **fast_brief_v1** | FAST-9 + ManualBRIEF | 0.2302 | 0.6755 | 32.95 | 45.87% | 31.39 |
+| **orb_orb_v1** (Baseline) | ORB + ORB | 0.2775 | 0.7242 | 32.75 | 52.26% | 35.70 |
+
+> **Key Finding:** FAST+ORB delivers the highest throughput (**48.22 FPS**, +60% over 30 Hz real-time threshold) with low latency (21.47 ms). ORB+BRISK yields optimal trajectory accuracy (**0.1732 m ATE RMSE**) and tracking robustness (**54.04%**). Detailed discussion is in [`docs/report.md`](docs/report.md).
 
 To evaluate performance across contrasting operational regimes under a lightweight storage footprint (~1 GB per dataset), the system benchmarks four distinct environments:
 
