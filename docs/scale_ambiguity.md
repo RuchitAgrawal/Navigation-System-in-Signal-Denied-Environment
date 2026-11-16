@@ -1,4 +1,4 @@
-﻿# Monocular Visual Odometry: Scale Ambiguity
+# Monocular Visual Odometry: Scale Ambiguity
 
 ## What is scale ambiguity?
 
