@@ -3,10 +3,21 @@
 All notable changes to this project are documented here.
 
 ## [Unreleased]
-- [ ] Download and run on actual ICL-NUIM dataset
-- [ ] Populate report.md results tables with measured values
 - [ ] Implement GPS/VO fusion EKF interface
-- [ ] FASTER detector genuine implementation
+- [ ] Hardware-in-the-loop flight controller testing (Pixhawk / ROS2)
+
+## [0.6.0] - 2026-11-16
+- Download and unpack authentic 1,017-frame ICL-NUIM Living Room sequence (`living_room_traj1_loop`)
+- Execute comprehensive 4-configuration benchmark on real photographic frames:
+  - `FAST + ORB`: 48.22 FPS, 0.2219 m ATE RMSE, 44.59% tracking rate
+  - `ORB + BRISK`: 30.11 FPS, 0.1732 m ATE RMSE, 54.04% tracking rate (accuracy-optimal)
+  - `FAST + BRIEF`: 32.95 FPS, 0.2302 m ATE RMSE, 45.87% tracking rate
+  - `ORB + ORB`: 32.75 FPS, 0.2775 m ATE RMSE, 52.26% tracking rate
+- Populate `docs/report.md` with full empirical tables (ATE, RPE, P95 latency distribution)
+- Formalize Umeyama (1991) Sim(3) analytical formulation in `docs/scale_ambiguity.md`
+- Document Pareto efficiency frontier across feature algorithms in `docs/feature_algorithms.md`
+- Add `.gitattributes` to enforce LF line endings and suppress CRLF checkout warnings
+- All 170 pytest unit tests passing with zero failures
 
 ## [0.5.0] - 2024-10-19 to 2024-10-21
 - Add epipolar geometry visualization module
