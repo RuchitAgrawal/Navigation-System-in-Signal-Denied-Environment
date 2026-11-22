@@ -115,6 +115,13 @@ python scripts/generate_trajectory_video.py \
 python scripts/run_demo.py
 ```
 
+### 6. Run Live Camera Dashboard & Real-Time HUD
+Connects to your live webcam, overlays detected feature tracking, and plots real-time bird's-eye trajectory with GPS-denied simulation toggles:
+```bash
+python scripts/live_dashboard.py
+# Controls: Press 'G' to toggle GPS Denied Mode | 'R' to reset origin | 'S' to save screenshot
+```
+
 ---
 
 ## Quantitative Benchmark Results (2+2 Multi-Environment Suite)
